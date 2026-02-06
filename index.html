@@ -3,9 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BDO Helper - Zarządzaj odpadami bez stresu i kar</title>
-    <meta name="description" content="Koniec z zawiłym systemem BDO. Intuicyjna aplikacja dla małych firm - warsztaty, salony, budowlanka. Oszczędź czas i uniknij kar.">
-    
+    <title>BDO Helper | Pilnuj limitów i generuj KPO w 15 sekund</title>
+<meta name="description" content="Prosty asystent BDO dla małych firm. Alerty o limitach zwolnień, szybki generator KPO i gotowe zestawienia do raportu rocznego. Sprawdź Early Access!">
+    <meta property="og:title" content="BDO Helper - Asystent dla Twojej firmy">
+    <meta property="og:description" content="Zadbaj o porządek w ewidencji odpadów. Zapisz się na beta testy.">
+    <meta property="og:url" content="https://bdo-helper.netlify.app">
     <!-- Tailwind CSS via CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -858,7 +860,208 @@
             </button>
         </div>
     </section>
+    <!-- FAQ Section - Insert before footer -->
+<section class="py-20 bg-white">
+    <div class="container mx-auto px-4">
+        <!-- Section Header -->
+        <div class="text-center mb-16">
+            <h2 class="text-4xl md:text-5xl font-bold text-slate-800 mb-4">
+                Najczęściej zadawane<br/>
+                <span class="text-emerald-600">pytania</span>
+            </h2>
+            <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+                Wszystko, co musisz wiedzieć o zarządzaniu odpadami i unikaniu kar
+            </p>
+        </div>
 
+        <!-- FAQ Items Container -->
+        <div class="max-w-4xl mx-auto space-y-4">
+            
+            <!-- FAQ Item 1: Limits verification -->
+            <div class="bg-gradient-to-br from-gray-50 to-white rounded-2xl border-2 border-emerald-100 overflow-hidden hover:shadow-lg transition-all duration-300">
+                <button 
+                    onclick="toggleFAQ('faq1')" 
+                    class="w-full px-6 md:px-8 py-6 flex items-center justify-between text-left group"
+                    aria-expanded="false"
+                    aria-controls="faq1">
+                    <div class="flex items-start space-x-4 flex-1">
+                        <!-- Icon -->
+                        <div class="flex-shrink-0 w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center group-hover:bg-emerald-200 transition-colors">
+                            <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                            </svg>
+                        </div>
+                        <!-- Question text -->
+                        <h3 class="text-lg md:text-xl font-bold text-slate-800 pr-4">
+                            Jak sprawdzić limity BDO 2026?
+                        </h3>
+                    </div>
+                    <!-- Chevron icon -->
+                    <svg id="chevron-faq1" class="w-6 h-6 text-emerald-600 transform transition-transform duration-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </button>
+                
+                <!-- Answer (hidden by default) -->
+                <div id="faq1" class="hidden px-6 md:px-8 pb-6">
+                    <div class="pl-0 md:pl-14 text-gray-700 leading-relaxed">
+                        <p>
+                            Limity zależą od kodów odpadów (np. <strong class="text-slate-800">500 kg rocznie dla opakowań z papieru</strong>). 
+                            Nasz system automatycznie sumuje wpisy i wysyła alerty przed przekroczeniem progu.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FAQ Item 2: Penalties for missing reports -->
+            <div class="bg-gradient-to-br from-gray-50 to-white rounded-2xl border-2 border-emerald-100 overflow-hidden hover:shadow-lg transition-all duration-300">
+                <button 
+                    onclick="toggleFAQ('faq2')" 
+                    class="w-full px-6 md:px-8 py-6 flex items-center justify-between text-left group"
+                    aria-expanded="false"
+                    aria-controls="faq2">
+                    <div class="flex items-start space-x-4 flex-1">
+                        <!-- Icon -->
+                        <div class="flex-shrink-0 w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center group-hover:bg-red-200 transition-colors">
+                            <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                            </svg>
+                        </div>
+                        <!-- Question text -->
+                        <h3 class="text-lg md:text-xl font-bold text-slate-800 pr-4">
+                            Ile kosztuje kara za brak sprawozdania BDO?
+                        </h3>
+                    </div>
+                    <!-- Chevron icon -->
+                    <svg id="chevron-faq2" class="w-6 h-6 text-emerald-600 transform transition-transform duration-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </button>
+                
+                <!-- Answer (hidden by default) -->
+                <div id="faq2" class="hidden px-6 md:px-8 pb-6">
+                    <div class="pl-0 md:pl-14 text-gray-700 leading-relaxed">
+                        <p>
+                            Administracyjne kary pieniężne nakładane przez WIOŚ mogą wynosić 
+                            <strong class="text-red-600">od 5 000 zł do nawet 1 000 000 zł</strong>. 
+                            Pomagamy ich uniknąć dzięki terminowym przypomnieniom.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FAQ Item 3: Quick KPO generation -->
+            <div class="bg-gradient-to-br from-gray-50 to-white rounded-2xl border-2 border-emerald-100 overflow-hidden hover:shadow-lg transition-all duration-300">
+                <button 
+                    onclick="toggleFAQ('faq3')" 
+                    class="w-full px-6 md:px-8 py-6 flex items-center justify-between text-left group"
+                    aria-expanded="false"
+                    aria-controls="faq3">
+                    <div class="flex items-start space-x-4 flex-1">
+                        <!-- Icon -->
+                        <div class="flex-shrink-0 w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center group-hover:bg-blue-200 transition-colors">
+                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                            </svg>
+                        </div>
+                        <!-- Question text -->
+                        <h3 class="text-lg md:text-xl font-bold text-slate-800 pr-4">
+                            Jak najszybciej wystawić KPO?
+                        </h3>
+                    </div>
+                    <!-- Chevron icon -->
+                    <svg id="chevron-faq3" class="w-6 h-6 text-emerald-600 transform transition-transform duration-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </button>
+                
+                <!-- Answer (hidden by default) -->
+                <div id="faq3" class="hidden px-6 md:px-8 pb-6">
+                    <div class="pl-0 md:pl-14 text-gray-700 leading-relaxed">
+                        <p>
+                            Zamiast logować się do e-PUAP przy każdym wywozie, skorzystaj z naszego asystenta, 
+                            który przygotuje wszystkie dane do KPO <strong class="text-blue-600">w 15 sekund na Twoim telefonie</strong>.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FAQ Item 4: Independence from government systems -->
+            <div class="bg-gradient-to-br from-gray-50 to-white rounded-2xl border-2 border-emerald-100 overflow-hidden hover:shadow-lg transition-all duration-300">
+                <button 
+                    onclick="toggleFAQ('faq4')" 
+                    class="w-full px-6 md:px-8 py-6 flex items-center justify-between text-left group"
+                    aria-expanded="false"
+                    aria-controls="faq4">
+                    <div class="flex items-start space-x-4 flex-1">
+                        <!-- Icon -->
+                        <div class="flex-shrink-0 w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center group-hover:bg-purple-200 transition-colors">
+                            <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <!-- Question text -->
+                        <h3 class="text-lg md:text-xl font-bold text-slate-800 pr-4">
+                            Czy aplikacja jest powiązana z ministerstwem?
+                        </h3>
+                    </div>
+                    <!-- Chevron icon -->
+                    <svg id="chevron-faq4" class="w-6 h-6 text-emerald-600 transform transition-transform duration-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </button>
+                
+                <!-- Answer (hidden by default) -->
+                <div id="faq4" class="hidden px-6 md:px-8 pb-6">
+                    <div class="pl-0 md:pl-14 text-gray-700 leading-relaxed">
+                        <p>
+                            <strong class="text-slate-800">BDO Helper to niezależny asystent ewidencji pomocniczej</strong>. 
+                            Działamy zawsze, nawet gdy oficjalne systemy rządowe mają awarię lub przerwę serwisową.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Bottom CTA after FAQ -->
+        <div class="mt-12 text-center">
+            <p class="text-gray-600 mb-6">Masz więcej pytań? Chętnie pomożemy!</p>
+            <a href="#pricing" class="inline-block bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-8 py-4 rounded-full font-semibold text-lg hover:shadow-xl transition-all hover:-translate-y-1">
+                Sprawdź dostępność
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- FAQ JavaScript - Add this script at the end of your existing JavaScript section -->
+<script>
+    // English comment: Toggle FAQ accordion item - shows/hides answer and rotates chevron icon
+    function toggleFAQ(faqId) {
+        const faqContent = document.getElementById(faqId);
+        const chevron = document.getElementById('chevron-' + faqId);
+        const button = faqContent.previousElementSibling;
+        
+        // English comment: Check if currently open
+        const isOpen = !faqContent.classList.contains('hidden');
+        
+        if (isOpen) {
+            // English comment: Close this FAQ item
+            faqContent.classList.add('hidden');
+            chevron.classList.remove('rotate-180');
+            button.setAttribute('aria-expanded', 'false');
+        } else {
+            // English comment: Open this FAQ item
+            faqContent.classList.remove('hidden');
+            chevron.classList.add('rotate-180');
+            button.setAttribute('aria-expanded', 'true');
+        }
+    }
+    
+    // English comment: Optional - Auto-open first FAQ item on page load for better UX
+    // Uncomment the line below if you want the first question to be open by default
+    // toggleFAQ('faq1');
+</script>
     <!-- Footer -->
     <footer class="bg-slate-900 text-gray-400 py-12">
         <div class="container mx-auto px-4">

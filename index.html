@@ -188,22 +188,27 @@
 <body class="bg-gray-50 text-gray-900">
 
     <!-- Sticky Navigation Header -->
-    <header class="fixed top-0 left-0 right-0 z-50 bg-white shadow-md transition-all duration-300">
-        <nav class="container mx-auto px-4 py-4 flex items-center justify-between">
-            <!-- Logo -->
-            <div class="flex items-center space-x-2">
-                <svg class="w-8 h-8 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                </svg>
-                <span class="text-2xl font-bold text-slate-800">BDO Helper</span>
-            </div>
-            
-            <!-- CTA Button -->
+<header class="fixed top-0 left-0 right-0 z-50 bg-white shadow-md transition-all duration-300">
+    <nav class="container mx-auto px-4 py-4 flex items-center justify-between">
+        <!-- Logo -->
+        <div class="flex items-center space-x-2">
+            <svg class="w-8 h-8 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+            <span class="text-2xl font-bold text-slate-800">BDO Helper</span>
+        </div>
+        
+        <!-- Navigation buttons -->
+        <div class="flex items-center space-x-4">
+            <a href="login.html" class="hidden md:block text-slate-600 hover:text-emerald-600 font-medium transition-colors">
+                Zaloguj się
+            </a>
             <a href="#pricing" class="btn-primary text-white px-6 py-3 rounded-full font-semibold hover:shadow-lg">
                 Zacznij teraz
             </a>
-        </nav>
-    </header>
+        </div>
+    </nav>
+</header>
 
     <!-- Hero Section -->
     <section class="hero-gradient text-white pt-32 pb-20 relative">
@@ -1086,6 +1091,7 @@
                         <li><a href="#features" class="hover:text-emerald-400 transition-colors">Funkcje</a></li>
                         <li><a href="#pricing" class="hover:text-emerald-400 transition-colors">Cennik</a></li>
                         <li><a href="#" class="hover:text-emerald-400 transition-colors">FAQ</a></li>
+                        <li><a href="login.html" class="hover:text-emerald-400 transition-colors">Panel użytkownika</a></li>
                     </ul>
                 </div>
                 
@@ -1177,7 +1183,10 @@
                     <p class="text-gray-600 mb-6">
                         Twoje zgłoszenie zostało przyjęte. Skontaktujemy się z Tobą w ciągu 24 godzin.
                     </p>
-                    <button onclick="closeModal()" class="bg-emerald-600 text-white px-8 py-3 rounded-full font-semibold hover:bg-emerald-700 transition-colors">
+                    <a href="register.html" class="inline-block bg-emerald-600 text-white px-8 py-3 rounded-full font-semibold hover:bg-emerald-700 transition-colors mb-3">
+                        Utwórz konto teraz
+                    </a>
+                    <button onclick="closeModal()" class="block w-full text-gray-600 hover:text-gray-800 text-sm">
                         Zamknij
                     </button>
                 </div>
@@ -1246,8 +1255,9 @@
                 document.getElementById('emailForm').classList.add('hidden');
                 document.getElementById('successMessage').classList.remove('hidden');
                 
-                // English comment: Optional - Send to analytics/tracking (Google Analytics, Facebook Pixel, etc.)
-                // gtag('event', 'conversion', { 'send_to': 'AW-CONVERSION_ID/CONVERSION_LABEL' });
+                setTimeout(() => {
+                    window.location.href = 'register.html';
+                }, 3000);
             }
         }
         

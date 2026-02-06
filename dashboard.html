@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BDO Helper - Dashboard</title>
+    <meta name="description" content="Panel zarządzania odpadami - BDO Helper">
+    
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Supabase JS Client via CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- Google Fonts - Consistent with landing page -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Custom CSS variables for consistent theming */
+        :root {
+            --primary-forest: #1a5f4a;
+            --primary-emerald: #10b981;
+            --accent-blue: #0ea5e9;
+            --dark-slate: #1e293b;
+            --light-sage: #f0fdf4;
+            --warning-amber: #f59e0b;
+            --danger-red: #ef4444;
+        }
+        
+        body {
+            font-family: 'Manrope', sans-serif;
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        /* Smooth transitions */
+        * {
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+        
+        /* Modal overlay styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 0;
+            border-radius: 16px;
+            max-width: 500px;
+            animation: slideDown 0.4s ease;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        
+        @keyframes slideDown {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        /* Progress bar animation */
+        .progress-bar {
+            transition: width 0.6s ease-in-out;
+        }
+        
+        /* Loading spinner */
+        .spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid var(--primary-emerald);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+
+    <!-- Top Navigation Bar -->
+    <nav class="bg-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-4 flex items-center justify-between">
+            <!-- Logo -->
+            <div class="flex items-center space-x-2">
+                <svg class="w-8 h-8 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                <span class="text-xl font-bold text-slate-800">BDO Helper</span>
+            </div>
+            
+            <!-- User info and logout -->
+            <div class="flex items-center space-x-4">
+                <span id="userEmail" class="hidden md:block text-sm text-gray-600"></span>
+                <button onclick="handleLogout()" class="text-sm text-gray-600 hover:text-emerald-600 font-medium">
+                    Wyloguj
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8 pb-24">
+        
+        <!-- Loading State -->
+        <div id="loadingState" class="flex flex-col items-center justify-center py-20">
+            <div class="spinner mb-4"></div>
+            <p class="text-gray-600">Ładowanie danych...</p>
+        </div>
+
+        <!-- Dashboard Content (hidden initially) -->
+        <div id="dashboardContent" class="hidden">
+            
+            <!-- Welcome Header -->
+            <div class="mb-8">
+                <h1 class="text-3xl md:text-4xl font-bold text-slate-800 mb-2">
+                    Witaj w panelu BDO Helper
+                </h1>
+                <p class="text-gray-600">
+                    Zarządzaj odpadami i pilnuj limitów w jednym miejscu
+                </p>
+            </div>
+
+            <!-- Limit Cards Grid -->
+            <div class="grid md:grid-cols-3 gap-6 mb-8">
+                
+                <!-- Limit Card 1: Paper packaging -->
+                <div id="limitCard1" class="bg-white rounded-2xl shadow-lg p-6 border-2 border-gray-200">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex-1">
+                            <div class="text-xs text-gray-500 mb-1">Kod odpadu</div>
+                            <h3 class="text-lg font-bold text-slate-800">15 01 01</h3>
+                            <p class="text-sm text-gray-600">Opakowania z papieru</p>
+                        </div>
+                        <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                            <svg class="w-7 h-7 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                        </div>
+                    </div>
+                    
+                    <!-- Weight display -->
+                    <div class="mb-3">
+                        <div class="flex items-baseline justify-between mb-1">
+                            <span class="text-sm font-semibold text-slate-700">Wykorzystano</span>
+                            <span id="weight1" class="text-xl font-bold text-slate-800">0 kg</span>
+                        </div>
+                        <div class="text-xs text-gray-500">Limit: 500 kg (0.5 Mg)</div>
+                    </div>
+                    
+                    <!-- Progress bar -->
+                    <div class="w-full bg-gray-200 rounded-full h-3 overflow-hidden mb-2">
+                        <div id="progressBar1" class="progress-bar bg-emerald-500 h-3 rounded-full" style="width: 0%"></div>
+                    </div>
+                    
+                    <!-- Status message -->
+                    <div id="statusMessage1" class="flex items-center text-xs text-emerald-600">
+                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                        </svg>
+                        <span>Bezpieczna strefa</span>
+                    </div>
+                </div>
+
+                <!-- Limit Card 2: Plastic packaging -->
+                <div id="limitCard2" class="bg-white rounded-2xl shadow-lg p-6 border-2 border-gray-200">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex-1">
+                            <div class="text-xs text-gray-500 mb-1">Kod odpadu</div>
+                            <h3 class="text-lg font-bold text-slate-800">15 01 02</h3>
+                            <p class="text-sm text-gray-600">Opakowania z tworzyw</p>
+                        </div>
+                        <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+                            <svg class="w-7 h-7 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                            </svg>
+                        </div>
+                    </div>
+                    
+                    <!-- Weight display -->
+                    <div class="mb-3">
+                        <div class="flex items-baseline justify-between mb-1">
+                            <span class="text-sm font-semibold text-slate-700">Wykorzystano</span>
+                            <span id="weight2" class="text-xl font-bold text-slate-800">0 kg</span>
+                        </div>
+                        <div class="text-xs text-gray-500">Limit: 500 kg (0.5 Mg)</div>
+                    </div>
+                    
+                    <!-- Progress bar -->
+                    <div class="w-full bg-gray-200 rounded-full h-3 overflow-hidden mb-2">
+                        <div id="progressBar2" class="progress-bar bg-emerald-500 h-3 rounded-full" style="width: 0%"></div>
+                    </div>
+                    
+                    <!-- Status message -->
+                    <div id="statusMessage2" class="flex items-center text-xs text-emerald-600">
+                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                        </svg>
+                        <span>Bezpieczna strefa</span>
+                    </div>
+                </div>
+
+                <!-- Limit Card 3: Engine oils -->
+                <div id="limitCard3" class="bg-white rounded-2xl shadow-lg p-6 border-2 border-gray-200">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex-1">
+                            <div class="text-xs text-gray-500 mb-1">Kod odpadu</div>
+                            <h3 class="text-lg font-bold text-slate-800">13 02 08</h3>
+                            <p class="text-sm text-gray-600">Inne oleje silnikowe</p>
+                        </div>
+                        <div class="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center">
+                            <svg class="w-7 h-7 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/>
+                            </svg>
+                        </div>
+                    </div>
+                    
+                    <!-- Weight display -->
+                    <div class="mb-3">
+                        <div class="flex items-baseline justify-between mb-1">
+                            <span class="text-sm font-semibold text-slate-700">Wykorzystano</span>
+                            <span id="weight3" class="text-xl font-bold text-slate-800">0 kg</span>
+                        </div>
+                        <div class="text-xs text-gray-500">Alert próg: 100 kg</div>
+                    </div>
+                    
+                    <!-- Progress bar -->
+                    <div class="w-full bg-gray-200 rounded-full h-3 overflow-hidden mb-2">
+                        <div id="progressBar3" class="progress-bar bg-emerald-500 h-3 rounded-full" style="width: 0%"></div>
+                    </div>
+                    
+                    <!-- Status message -->
+                    <div id="statusMessage3" class="flex items-center text-xs text-emerald-600">
+                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                        </svg>
+                        <span>Bezpieczna strefa</span>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Recent Entries Section -->
+            <div class="bg-white rounded-2xl shadow-lg p-6 border-2 border-gray-200 mb-8">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-2xl font-bold text-slate-800">Ostatnie wpisy</h2>
+                    <span class="text-sm text-gray-500">5 najnowszych</span>
+                </div>
+
+                <!-- Entries Table -->
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="border-b-2 border-gray-200">
+                                <th class="text-left py-3 px-2 text-sm font-semibold text-gray-600">Data</th>
+                                <th class="text-left py-3 px-2 text-sm font-semibold text-gray-600">Kod</th>
+                                <th class="text-right py-3 px-2 text-sm font-semibold text-gray-600">Waga [kg]</th>
+                            </tr>
+                        </thead>
+                        <tbody id="entriesTableBody">
+                            <!-- English comment: Table rows will be populated by JavaScript -->
+                            <tr>
+                                <td colspan="3" class="text-center py-8 text-gray-500">
+                                    Brak wpisów. Dodaj pierwszy wpis!
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Floating Action Button (FAB) for adding new entry -->
+    <button onclick="openAddEntryModal()" class="fixed bottom-6 right-6 w-16 h-16 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-transform z-50">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+        </svg>
+    </button>
+
+    <!-- Bottom Navigation (Mobile) -->
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40">
+        <div class="grid grid-cols-3 gap-0">
+            <button class="py-4 flex flex-col items-center text-emerald-600">
+                <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                </svg>
+                <span class="text-xs font-medium">Panel</span>
+            </button>
+            <button onclick="openAddEntryModal()" class="py-4 flex flex-col items-center text-gray-600">
+                <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+                <span class="text-xs font-medium">Dodaj</span>
+            </button>
+            <button class="py-4 flex flex-col items-center text-gray-600">
+                <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                </svg>
+                <span class="text-xs font-medium">Raporty</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Modal: Add New Entry -->
+    <div id="addEntryModal" class="modal">
+        <div class="modal-content">
+            <!-- Modal header -->
+            <div class="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white p-6 rounded-t-2xl">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-2xl font-bold">Dodaj nowy wpis</h3>
+                    <button onclick="closeAddEntryModal()" class="text-white hover:text-gray-200 text-3xl leading-none">&times;</button>
+                </div>
+            </div>
+            
+            <!-- Modal body -->
+            <div class="p-6">
+                <form id="addEntryForm" onsubmit="handleAddEntry(event)">
+                    <!-- Waste code selection -->
+                    <div class="mb-6">
+                        <label for="wasteCode" class="block text-gray-700 font-semibold mb-2">Kod odpadu</label>
+                        <select 
+                            id="wasteCode" 
+                            name="wasteCode" 
+                            required
+                            class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-emerald-500 focus:outline-none text-gray-800">
+                            <option value="">Wybierz kod...</option>
+                            <option value="15 01 01">15 01 01 - Opakowania z papieru</option>
+                            <option value="15 01 02">15 01 02 - Opakowania z tworzyw</option>
+                            <option value="13 02 08">13 02 08 - Inne oleje silnikowe</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Weight input -->
+                    <div class="mb-6">
+                        <label for="wasteWeight" class="block text-gray-700 font-semibold mb-2">Waga [kg]</label>
+                        <input 
+                            type="number" 
+                            id="wasteWeight" 
+                            name="wasteWeight" 
+                            required 
+                            step="0.1"
+                            min="0.1"
+                            placeholder="np. 25.5"
+                            class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-emerald-500 focus:outline-none text-gray-800">
+                    </div>
+                    
+                    <!-- Date input -->
+                    <div class="mb-6">
+                        <label for="entryDate" class="block text-gray-700 font-semibold mb-2">Data przekazania</label>
+                        <input 
+                            type="date" 
+                            id="entryDate" 
+                            name="entryDate" 
+                            required
+                            class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-emerald-500 focus:outline-none text-gray-800">
+                    </div>
+                    
+                    <button type="submit" class="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-6 py-4 rounded-full font-bold text-lg hover:shadow-xl transition-all">
+                        Dodaj wpis
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // English comment: Supabase configuration - replace with your actual credentials
+        const SUPABASE_URL = 'REPLACE_ME_URL';
+        const SUPABASE_KEY = 'REPLACE_ME_KEY';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // English comment: Waste code limits configuration (in kg)
+        const WASTE_LIMITS = {
+            '15 01 01': 500,  // Paper packaging: 0.5 Mg
+            '15 01 02': 500,  // Plastic packaging: 0.5 Mg
+            '13 02 08': 100   // Engine oils: test threshold
+        };
+
+        // English comment: Global variable to store current user
+        let currentUser = null;
+
+        // English comment: Initialize app on page load
+        document.addEventListener('DOMContentLoaded', async () => {
+            await checkAuth();
+            
+            // English comment: Set today's date as default in the form
+            document.getElementById('entryDate').valueAsDate = new Date();
+        });
+
+        // English comment: Check if user is authenticated
+        async function checkAuth() {
+            const { data: { user }, error } = await supabaseClient.auth.getUser();
+            
+            if (error || !user) {
+                // English comment: Redirect to login page if not authenticated
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            currentUser = user;
+            document.getElementById('userEmail').textContent = user.email;
+            
+            // English comment: Load dashboard data
+            await loadDashboard();
+        }
+
+        // English comment: Load dashboard data and calculate limits
+        async function loadDashboard() {
+            try {
+                // English comment: Show loading state
+                document.getElementById('loadingState').classList.remove('hidden');
+                document.getElementById('dashboardContent').classList.add('hidden');
+                
+                // English comment: Get current year for filtering
+                const currentYear = new Date().getFullYear();
+                const yearStart = `${currentYear}-01-01`;
+                const yearEnd = `${currentYear}-12-31`;
+                
+                // English comment: Fetch waste entries from Supabase for current year
+                const { data: entries, error } = await supabaseClient
+                    .from('waste_entries')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .gte('entry_date', yearStart)
+                    .lte('entry_date', yearEnd)
+                    .order('entry_date', { ascending: false });
+                
+                if (error) {
+                    console.error('Error fetching entries:', error);
+                    alert('Błąd pobierania danych: ' + error.message);
+                    return;
+                }
+                
+                // English comment: Calculate totals per waste code
+                calculateLimits(entries || []);
+                
+                // English comment: Display recent entries in table
+                displayRecentEntries(entries || []);
+                
+                // English comment: Hide loading, show dashboard
+                document.getElementById('loadingState').classList.add('hidden');
+                document.getElementById('dashboardContent').classList.remove('hidden');
+                
+            } catch (error) {
+                console.error('Dashboard error:', error);
+                alert('Wystąpił błąd podczas ładowania panelu');
+            }
+        }
+
+        // English comment: Calculate weight totals and update limit cards
+        function calculateLimits(entries) {
+            // English comment: Initialize totals object
+            const totals = {
+                '15 01 01': 0,
+                '15 01 02': 0,
+                '13 02 08': 0
+            };
+            
+            // English comment: Sum up weights per waste code
+            entries.forEach(entry => {
+                if (totals.hasOwnProperty(entry.waste_code)) {
+                    totals[entry.waste_code] += parseFloat(entry.weight_kg || 0);
+                }
+            });
+            
+            // English comment: Update each limit card
+            Object.keys(totals).forEach((code, index) => {
+                const cardNumber = index + 1;
+                const totalWeight = totals[code];
+                const limit = WASTE_LIMITS[code];
+                const percentage = (totalWeight / limit) * 100;
+                
+                // English comment: Update weight display
+                document.getElementById(`weight${cardNumber}`).textContent = `${totalWeight.toFixed(1)} kg`;
+                
+                // English comment: Update progress bar
+                const progressBar = document.getElementById(`progressBar${cardNumber}`);
+                progressBar.style.width = `${Math.min(percentage, 100)}%`;
+                
+                // English comment: Update status message and colors based on percentage
+                const statusMessage = document.getElementById(`statusMessage${cardNumber}`);
+                const limitCard = document.getElementById(`limitCard${cardNumber}`);
+                
+                if (percentage >= 100) {
+                    // English comment: Over limit - RED alert
+                    progressBar.className = 'progress-bar bg-red-600 h-3 rounded-full';
+                    limitCard.className = 'bg-white rounded-2xl shadow-lg p-6 border-2 border-red-400';
+                    statusMessage.innerHTML = `
+                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                        </svg>
+                        <span>Przekroczono limit!</span>
+                    `;
+                    statusMessage.className = 'flex items-center text-xs text-red-600 font-semibold';
+                } else if (percentage >= 80) {
+                    // English comment: 80-99% - YELLOW/AMBER warning
+                    progressBar.className = 'progress-bar bg-amber-500 h-3 rounded-full';
+                    limitCard.className = 'bg-white rounded-2xl shadow-lg p-6 border-2 border-amber-400';
+                    statusMessage.innerHTML = `
+                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                        </svg>
+                        <span>Uwaga - zbliżasz się do limitu!</span>
+                    `;
+                    statusMessage.className = 'flex items-center text-xs text-amber-600 font-semibold';
+                } else {
+                    // English comment: Under 80% - GREEN safe zone
+                    progressBar.className = 'progress-bar bg-emerald-500 h-3 rounded-full';
+                    limitCard.className = 'bg-white rounded-2xl shadow-lg p-6 border-2 border-gray-200';
+                    statusMessage.innerHTML = `
+                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                        </svg>
+                        <span>Bezpieczna strefa</span>
+                    `;
+                    statusMessage.className = 'flex items-center text-xs text-emerald-600';
+                }
+            });
+        }
+
+        // English comment: Display recent 5 entries in the table
+        function displayRecentEntries(entries) {
+            const tableBody = document.getElementById('entriesTableBody');
+            
+            if (!entries || entries.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="3" class="text-center py-8 text-gray-500">
+                            Brak wpisów. Dodaj pierwszy wpis!
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            // English comment: Take only first 5 entries (already sorted by date desc)
+            const recentEntries = entries.slice(0, 5);
+            
+            tableBody.innerHTML = recentEntries.map(entry => {
+                const date = new Date(entry.entry_date).toLocaleDateString('pl-PL');
+                return `
+                    <tr class="border-b border-gray-100 hover:bg-gray-50">
+                        <td class="py-3 px-2 text-sm text-gray-700">${date}</td>
+                        <td class="py-3 px-2 text-sm font-medium text-slate-800">${entry.waste_code}</td>
+                        <td class="py-3 px-2 text-sm text-right font-semibold text-emerald-700">${entry.weight_kg} kg</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // English comment: Modal functions
+        function openAddEntryModal() {
+            document.getElementById('addEntryModal').style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeAddEntryModal() {
+            document.getElementById('addEntryModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+            document.getElementById('addEntryForm').reset();
+            document.getElementById('entryDate').valueAsDate = new Date();
+        }
+        
+        // English comment: Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('addEntryModal');
+            if (event.target === modal) {
+                closeAddEntryModal();
+            }
+        }
+
+        // English comment: Handle adding new waste entry
+        async function handleAddEntry(event) {
+            event.preventDefault();
+            
+            const wasteCode = document.getElementById('wasteCode').value;
+            const weight = parseFloat(document.getElementById('wasteWeight').value);
+            const entryDate = document.getElementById('entryDate').value;
+            
+            try {
+                // English comment: Insert new entry into Supabase
+                const { data, error } = await supabaseClient
+                    .from('waste_entries')
+                    .insert([
+                        {
+                            user_id: currentUser.id,
+                            waste_code: wasteCode,
+                            weight_kg: weight,
+                            entry_date: entryDate
+                        }
+                    ]);
+                
+                if (error) {
+                    console.error('Insert error:', error);
+                    alert('Błąd dodawania wpisu: ' + error.message);
+                    return;
+                }
+                
+                // English comment: Success - close modal and reload dashboard
+                closeAddEntryModal();
+                await loadDashboard();
+                
+            } catch (error) {
+                console.error('Error adding entry:', error);
+                alert('Wystąpił błąd podczas dodawania wpisu');
+            }
+        }
+
+        // English comment: Handle user logout
+        async function handleLogout() {
+            const { error } = await supabaseClient.auth.signOut();
+            
+            if (error) {
+                console.error('Logout error:', error);
+                alert('Błąd wylogowania');
+                return;
+            }
+            
+            // English comment: Redirect to login page
+            window.location.href = 'login.html';
+        }
+    </script>
+
+</body>
+</html>

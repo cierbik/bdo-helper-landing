@@ -8,7 +8,10 @@
     
     <!-- Tailwind CSS via CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Supabase JS Client via CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <!-- Google Fonts - Distinctive typography for professional SaaS feel -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -401,6 +404,269 @@
         </div>
     </section>
 
+    <!-- Advanced Features Section - Detailed functionality explanation -->
+    <section class="py-20 bg-gradient-to-br from-slate-50 via-emerald-50 to-slate-50">
+        <div class="container mx-auto px-4">
+            <!-- Section Header -->
+            <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-5xl font-bold text-slate-800 mb-4">
+                    Funkcjonalności<br/>
+                    <span class="text-emerald-600">stworzone dla Ciebie</span>
+                </h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    Niezależny asystent, który pilnuje Twoich limitów i przygotowuje wszystkie dane. 
+                    Ty tylko przepisujesz gotowe zestawienia do systemu rządowego.
+                </p>
+            </div>
+
+            <!-- Features Grid - 3 columns on desktop, 1 on mobile -->
+            <div class="grid md:grid-cols-3 gap-8 max-w-7xl mx-auto">
+                
+                <!-- Feature 1: Limit Guardian with Progress Bar -->
+                <div class="bg-white rounded-2xl shadow-lg overflow-hidden border-2 border-emerald-100 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2">
+                    <!-- Icon header with gradient background -->
+                    <div class="bg-gradient-to-br from-emerald-500 to-emerald-600 p-6 text-white">
+                        <div class="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mb-4 backdrop-blur-sm">
+                            <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-2">🛡️ Strażnik Limitów</h3>
+                        <p class="text-emerald-100 text-sm">Nigdy więcej niespodzianek z Inspekcją</p>
+                    </div>
+                    
+                    <!-- Content area -->
+                    <div class="p-6">
+                        <p class="text-gray-700 mb-6 leading-relaxed">
+                            Wizualny pasek postępu pokazuje dokładnie, ile z Twojego limitu zwolnienia z ewidencji BDO zostało wykorzystane.
+                        </p>
+                        
+                        <!-- Visual example: Progress bar demonstration -->
+                        <div class="bg-slate-50 rounded-xl p-4 mb-4">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-sm font-semibold text-slate-700">Limit roczny (5 ton)</span>
+                                <span class="text-sm font-bold text-emerald-600">2.8 t / 5 t</span>
+                            </div>
+                            
+                            <!-- Progress bar -->
+                            <div class="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
+                                <div class="bg-gradient-to-r from-emerald-400 to-emerald-600 h-4 rounded-full shadow-inner transition-all duration-500" style="width: 56%">
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center mt-3 text-xs text-slate-600">
+                                <svg class="w-4 h-4 text-green-500 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                </svg>
+                                Bezpieczna strefa - zostało 2.2 tony
+                            </div>
+                        </div>
+                        
+                        <!-- Alert example when approaching limit -->
+                        <div class="bg-amber-50 border-2 border-amber-300 rounded-xl p-3 flex items-start space-x-3">
+                            <svg class="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                            </svg>
+                            <div>
+                                <p class="text-sm font-semibold text-amber-800">Alert automatyczny</p>
+                                <p class="text-xs text-amber-700">SMS/Email gdy zostanie &lt;500 kg</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Feature 2: Lightning-fast KPO preparation -->
+                <div class="bg-white rounded-2xl shadow-lg overflow-hidden border-2 border-emerald-100 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2">
+                    <!-- Icon header with gradient background -->
+                    <div class="bg-gradient-to-br from-blue-500 to-blue-600 p-6 text-white">
+                        <div class="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mb-4 backdrop-blur-sm">
+                            <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-2">⚡ Błyskawiczne KPO</h3>
+                        <p class="text-blue-100 text-sm">15 sekund zamiast 15 minut</p>
+                    </div>
+                    
+                    <!-- Content area -->
+                    <div class="p-6">
+                        <p class="text-gray-700 mb-6 leading-relaxed">
+                            Wypełniasz prosty formularz w telefonie, a aplikacja przygotowuje wszystkie dane do Karty Przekazania Odpadu.
+                        </p>
+                        
+                        <!-- Visual example: Quick data entry -->
+                        <div class="bg-slate-50 rounded-xl p-4 mb-4">
+                            <div class="space-y-3">
+                                <!-- Mock input field -->
+                                <div class="bg-white border-2 border-slate-200 rounded-lg p-3">
+                                    <div class="text-xs text-slate-500 mb-1">Kod odpadu</div>
+                                    <div class="font-semibold text-slate-800">17 01 01 - Odpady betonu</div>
+                                </div>
+                                
+                                <!-- Mock weight input -->
+                                <div class="bg-white border-2 border-slate-200 rounded-lg p-3">
+                                    <div class="text-xs text-slate-500 mb-1">Masa przekazana</div>
+                                    <div class="font-semibold text-slate-800">350 kg</div>
+                                </div>
+                                
+                                <!-- Mock recipient -->
+                                <div class="bg-white border-2 border-slate-200 rounded-lg p-3">
+                                    <div class="text-xs text-slate-500 mb-1">Odbiorca</div>
+                                    <div class="font-semibold text-slate-800">Recykling-Firma Sp. z o.o.</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Generated output preview -->
+                        <div class="bg-emerald-50 border-2 border-emerald-300 rounded-xl p-3">
+                            <div class="flex items-start space-x-3">
+                                <svg class="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                </svg>
+                                <div>
+                                    <p class="text-sm font-semibold text-emerald-800">Gotowy "ściągawka"</p>
+                                    <p class="text-xs text-emerald-700">Przepisz do systemu BDO w 15 sek</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Time saved badge -->
+                        <div class="mt-4 flex items-center justify-center space-x-2 text-sm text-slate-600">
+                            <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <span class="font-medium">Oszczędzasz: <strong class="text-blue-600">90% czasu</strong></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Feature 3: Annual Report Cheat Sheet -->
+                <div class="bg-white rounded-2xl shadow-lg overflow-hidden border-2 border-emerald-100 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2">
+                    <!-- Icon header with gradient background -->
+                    <div class="bg-gradient-to-br from-purple-500 to-purple-600 p-6 text-white">
+                        <div class="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mb-4 backdrop-blur-sm">
+                            <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-2">📅 Raport Roczny</h3>
+                        <p class="text-purple-100 text-sm">Gotowy przed 15 marca</p>
+                    </div>
+                    
+                    <!-- Content area -->
+                    <div class="p-6">
+                        <p class="text-gray-700 mb-6 leading-relaxed">
+                            Automatyczne podsumowanie całego roku: wszystkie kody odpadów i sumy wag w jednej gotowej tabeli do przepisania.
+                        </p>
+                        
+                        <!-- Visual example: Annual summary table -->
+                        <div class="bg-slate-50 rounded-xl p-4 mb-4 overflow-x-auto">
+                            <div class="text-xs font-semibold text-slate-600 mb-3 flex items-center justify-between">
+                                <span>Zestawienie roczne 2025</span>
+                                <span class="bg-purple-100 text-purple-700 px-2 py-1 rounded-full">Auto</span>
+                            </div>
+                            
+                            <!-- Mock table -->
+                            <table class="w-full text-xs">
+                                <thead>
+                                    <tr class="border-b-2 border-slate-200">
+                                        <th class="text-left py-2 text-slate-600 font-semibold">Kod</th>
+                                        <th class="text-right py-2 text-slate-600 font-semibold">Suma [kg]</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="text-slate-700">
+                                    <tr class="border-b border-slate-100">
+                                        <td class="py-2">17 01 01</td>
+                                        <td class="text-right font-medium">2,450</td>
+                                    </tr>
+                                    <tr class="border-b border-slate-100">
+                                        <td class="py-2">17 01 07</td>
+                                        <td class="text-right font-medium">1,820</td>
+                                    </tr>
+                                    <tr class="border-b border-slate-100">
+                                        <td class="py-2">15 01 02</td>
+                                        <td class="text-right font-medium">680</td>
+                                    </tr>
+                                    <tr class="font-bold bg-slate-100">
+                                        <td class="py-2">RAZEM:</td>
+                                        <td class="text-right text-emerald-700">4,950 kg</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Export/Copy button example -->
+                        <div class="flex space-x-2">
+                            <button class="flex-1 bg-purple-100 text-purple-700 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-purple-200 transition-colors flex items-center justify-center space-x-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/>
+                                </svg>
+                                <span>Kopiuj</span>
+                            </button>
+                            <button class="flex-1 bg-emerald-100 text-emerald-700 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-emerald-200 transition-colors flex items-center justify-center space-x-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"/>
+                                </svg>
+                                <span>Excel</span>
+                            </button>
+                        </div>
+                        
+                        <!-- Deadline reminder -->
+                        <div class="mt-4 bg-amber-50 border border-amber-200 rounded-lg p-2 text-center">
+                            <p class="text-xs text-amber-800">
+                                <strong>💡 Przypomnienie:</strong> Auto-reminder 7 dni przed terminem
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Bottom trust element - emphasizing the "Independent Assistant" model -->
+            <div class="mt-12 max-w-4xl mx-auto">
+                <div class="bg-white rounded-2xl shadow-lg p-8 border-2 border-emerald-100">
+                    <div class="flex flex-col md:flex-row items-center md:items-start space-y-4 md:space-y-0 md:space-x-6">
+                        <!-- Icon -->
+                        <div class="flex-shrink-0">
+                            <div class="w-16 h-16 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-2xl flex items-center justify-center">
+                                <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                                </svg>
+                            </div>
+                        </div>
+                        
+                        <!-- Content -->
+                        <div class="flex-1 text-center md:text-left">
+                            <h4 class="text-xl font-bold text-slate-800 mb-2">
+                                Model "Niezależnego Asystenta" = Bezpieczeństwo Twoich Danych
+                            </h4>
+                            <p class="text-gray-600 leading-relaxed">
+                                BDO Helper <strong>nie łączy się bezpośrednio z systemem rządowym</strong>. 
+                                Działasz lokalnie, Ty decydujesz kiedy i co przesłać. Aplikacja tylko pomaga 
+                                przygotować poprawne dane i pilnuje limitów. <span class="text-emerald-600 font-semibold">Zero ryzyka, 100% kontroli.</span>
+                            </p>
+                        </div>
+                        
+                        <!-- Trust badge -->
+                        <div class="flex-shrink-0">
+                            <div class="bg-emerald-50 border-2 border-emerald-300 rounded-xl px-4 py-3">
+                                <div class="flex items-center space-x-2">
+                                    <svg class="w-6 h-6 text-emerald-600" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                    </svg>
+                                    <div class="text-sm">
+                                        <div class="font-bold text-emerald-800">RODO</div>
+                                        <div class="text-xs text-emerald-600">Zgodne</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Pain Points vs Solution Section -->
     <section class="py-20 bg-gradient-to-br from-slate-50 to-gray-100">
         <div class="container mx-auto px-4">
@@ -687,21 +953,13 @@
                             <option value="inne">Inne</option>
                         </select>
                     </div>
-
-                    <div class="bg-gray-50 p-3 rounded-lg mb-6 border border-gray-100">
-                        <p class="text-[10px] text-gray-500 leading-tight">
-                            <strong>Informacja RODO:</strong> Wysyłając zgłoszenie, zgadzasz się na kontakt mailowy w celu przedstawienia oferty BDO Helper. 
-                            Administratorem danych jest BDO Helper. Dane są przetwarzane wyłącznie w celu powiadomienia o starcie usługi. 
-                            Masz prawo do wglądu, poprawiania oraz żądania usunięcia swoich danych (prawo do zapomnienia).
-                        </p>
-                    </div>
-
-                    <button type="submit" class="w-full btn-primary text-white px-6 py-4 rounded-full font-bold text-lg hover:shadow-lg transition-shadow">
+                    
+                    <button type="submit" class="w-full btn-primary text-white px-6 py-4 rounded-full font-bold text-lg">
                         Wyślij zgłoszenie
                     </button>
                     
-                    <p class="text-[10px] text-gray-400 mt-4 text-center italic">
-                        * Twoje dane są bezpieczne i nigdy nie zostaną przekazane podmiotom trzecim.
+                    <p class="text-xs text-gray-500 mt-4 text-center">
+                        Klikając "Wyślij zgłoszenie" akceptujesz naszą politykę prywatności
                     </p>
                 </form>
                 
@@ -726,37 +984,11 @@
 
     <!-- JavaScript for interactivity -->
     <script>
+        // English comment: Supabase configuration - replace with your actual credentials
         const SUPABASE_URL = 'REPLACE_ME_URL';
         const SUPABASE_KEY = 'REPLACE_ME_KEY';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        async function handleSubmit(event) {
-            event.preventDefault();
-            
-            const emailInput = document.getElementById('userEmail').value;
-            const companyTypeInput = document.getElementById('companyType').value;
-            
-            // English comment: We only send email and company_type. 
-            // ID and Created_at are handled automatically by the database.
-            const { data, error } = await supabaseClient
-                .from('leads')
-                .insert([
-                    { 
-                        email: emailInput, 
-                        company_type: companyTypeInput 
-                    }
-                ]);
-
-            if (error) {
-                console.error('Database Error:', error);
-                // English comment: Alerting user if RLS is still enabled or table name is wrong
-                alert('Błąd zapisu: ' + error.message);
-            } else {
-                console.log('Success! Initial lead stored.');
-                document.getElementById('emailForm').classList.add('hidden');
-                document.getElementById('successMessage').classList.remove('hidden');
-            }
-        }
         // Modal functions
         function openModal() {
             document.getElementById('emailModal').style.display = 'block';
@@ -780,33 +1012,41 @@
             }
         }
         
-        // Handle form submission (conversion goal)
+        // English comment: Handle form submission with Supabase database integration
         async function handleSubmit(event) {
-        event.preventDefault();
-        
-        const emailValue = document.getElementById('userEmail').value;
-        const companyValue = document.getElementById('companyType').value;
-        
-        // This is the part that talks to your database
-        const { data, error } = await supabaseClient
-            .from('leads')
-            .insert([
-                { 
-                    email: emailValue, 
-                    company_type: companyValue 
-                }
-            ]);
+            event.preventDefault();
+            
+            const emailInput = document.getElementById('userEmail').value;
+            const companyTypeInput = document.getElementById('companyType').value;
+            
+            // English comment: We only send email and company_type. 
+            // ID and Created_at are handled automatically by the database.
+            const { data, error } = await supabaseClient
+                .from('leads')
+                .insert([
+                    { 
+                        email: emailInput, 
+                        company_type: companyTypeInput 
+                    }
+                ]);
 
-        if (error) {
-            console.error('Database error:', error);
-            alert('Wystąpił błąd: ' + error.message);
-        } else {
-            // Success!
-            console.log('Data successfully sent to Supabase!');
-            document.getElementById('emailForm').classList.add('hidden');
-            document.getElementById('successMessage').classList.remove('hidden');
+            if (error) {
+                console.error('Database Error:', error);
+                // English comment: Alerting user if RLS is still enabled or table name is wrong
+                alert('Błąd zapisu: ' + error.message);
+            } else {
+                console.log('Success! Initial lead stored.');
+                // English comment: Also log to browser console for debugging/analytics backup
+                console.log('Lead data:', { email: emailInput, companyType: companyTypeInput });
+                
+                // English comment: Hide form and show success message
+                document.getElementById('emailForm').classList.add('hidden');
+                document.getElementById('successMessage').classList.remove('hidden');
+                
+                // English comment: Optional - Send to analytics/tracking (Google Analytics, Facebook Pixel, etc.)
+                // gtag('event', 'conversion', { 'send_to': 'AW-CONVERSION_ID/CONVERSION_LABEL' });
+            }
         }
-    }
         
         // Smooth scroll for anchor links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {

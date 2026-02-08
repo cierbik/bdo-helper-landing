@@ -286,15 +286,9 @@
     <!-- JavaScript -->
     <script>
         // English comment: Supabase configuration - will be replaced by sed in Netlify
-         const SUPABASE_URL = 'REPLACE_ME_URL';
+        const SUPABASE_URL = 'REPLACE_ME_URL';
         const SUPABASE_KEY = 'REPLACE_ME_KEY';
-        let supabaseClient = null;
-
-        try {
-            if (SUPABASE_URL !== 'REPLACE_ME_URL') {
-                supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-            }
-        } catch (e) { console.error("Config error", e); }
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         // English comment: Waste code descriptions mapping
         const WASTE_CODE_NAMES = {

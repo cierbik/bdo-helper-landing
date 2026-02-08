@@ -144,36 +144,52 @@
         </div>
     </div>
 
-    <script>
-        const SUPABASE_URL = 'REPLACE_ME_URL';
-        const SUPABASE_KEY = 'REPLACE_ME_KEY';
-        let supabaseClient = null;
+   <script>
+    const SUPABASE_URL = 'REPLACE_ME_URL';
+    const SUPABASE_KEY = 'REPLACE_ME_KEY';
+    let supabaseClient = null;
 
-        // English comment: Safe initialization
+    // English comment: Safe initialization - checking if Netlify replaced the strings
+    try {
+        if (SUPABASE_URL !== 'REPLACE_ME_URL' && SUPABASE_URL !== '') {
+            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        }
+    } catch (e) { 
+        console.error("Supabase Init Error:", e); 
+    }
+
+    const WASTE_LIMITS = {'15 01 01': 500, '15 01 02': 500, '13 02 08': 100};
+    let currentUser = null;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        if (!supabaseClient) {
+            console.error("Client not initialized. Check Netlify env vars.");
+            return;
+        }
+
+        // English comment: Using getSession for faster local check before calling getUser
+        const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
+        
+        if (sessionError || !session) {
+            console.warn("No session found, redirecting...");
+            window.location.href = 'login.html';
+            return;
+        }
+
+        currentUser = session.user;
+        
+        // English comment: Update UI with user info
+        const emailEl = document.getElementById('userEmail');
+        if (emailEl) emailEl.textContent = currentUser.email;
+        
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+        document.getElementById('entryDate').valueAsDate = new Date();
+        
+        await loadDashboard();
+    });
+
+    async function loadDashboard() {
         try {
-            if (SUPABASE_URL !== 'REPLACE_ME_URL') {
-                supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-            }
-        } catch (e) { console.error("Config error", e); }
-
-        const WASTE_LIMITS = {'15 01 01': 500, '15 01 02': 500, '13 02 08': 100};
-        let currentUser = null;
-
-        document.addEventListener('DOMContentLoaded', async () => {
-            if (!supabaseClient) {
-                alert("Błąd połączenia z bazą danych (Netlify keys).");
-                return;
-            }
-            const { data: { user } } = await supabaseClient.auth.getUser();
-            if (!user) { window.location.href = 'login.html'; return; }
-            currentUser = user;
-            document.getElementById('userEmail').textContent = user.email;
-            document.getElementById('currentYear').textContent = new Date().getFullYear();
-            document.getElementById('entryDate').valueAsDate = new Date();
-            loadDashboard();
-        });
-
-        async function loadDashboard() {
             const currentYear = new Date().getFullYear();
             const { data: entries, error } = await supabaseClient
                 .from('waste_entries')
@@ -183,68 +199,87 @@
                 .lte('entry_date', `${currentYear}-12-31`)
                 .order('entry_date', { ascending: false });
 
-            if (error) { console.error(error); return; }
+            if (error) throw error;
 
             renderUI(entries || []);
             document.getElementById('loadingState').classList.add('hidden');
             document.getElementById('dashboardContent').classList.remove('hidden');
+        } catch (err) {
+            console.error("Load Error:", err.message);
         }
+    }
 
-        function renderUI(entries) {
-            const totals = {'15 01 01': 0, '15 01 02': 0, '13 02 08': 0};
-            let grandTotal = 0;
+    function renderUI(entries) {
+        const totals = {'15 01 01': 0, '15 01 02': 0, '13 02 08': 0};
+        let grandTotal = 0;
 
-            entries.forEach(e => {
-                const w = parseFloat(e.weight_kg);
-                if (totals[e.waste_code] !== undefined) totals[e.waste_code] += w;
-                grandTotal += w;
-            });
+        entries.forEach(e => {
+            const w = parseFloat(e.weight_kg) || 0;
+            if (totals.hasOwnProperty(e.waste_code)) totals[e.waste_code] += w;
+            grandTotal += w;
+        });
 
-            // Render Annual Summary
-            document.getElementById('reportsSummary').innerHTML = Object.entries(totals).map(([code, weight]) => `
+        const summaryEl = document.getElementById('reportsSummary');
+        if (summaryEl) {
+            summaryEl.innerHTML = Object.entries(totals).map(([code, weight]) => `
                 <div class="flex justify-between items-center p-4 bg-gray-50 rounded-xl border border-gray-100">
                     <span class="font-bold text-slate-700">${code}</span>
                     <span class="font-bold text-emerald-600">${weight.toFixed(1)} kg</span>
                 </div>
             `).join('');
+        }
 
-            document.getElementById('totalWeight').textContent = `${grandTotal.toFixed(1)} kg`;
-            document.getElementById('totalWeightMg').textContent = `${(grandTotal / 1000).toFixed(3)} Mg`;
+        document.getElementById('totalWeight').textContent = `${grandTotal.toFixed(1)} kg`;
+        document.getElementById('totalWeightMg').textContent = `${(grandTotal / 1000).toFixed(3)} Mg`;
 
-            // Update Progress Bars
-            Object.keys(totals).forEach((code, i) => {
-                const w = totals[code];
-                const limit = WASTE_LIMITS[code];
-                const perc = Math.min((w / limit) * 100, 100);
-                document.getElementById(`weight${i+1}`).textContent = `${w.toFixed(1)} kg`;
-                const bar = document.getElementById(`progressBar${i+1}`);
+        Object.keys(totals).forEach((code, i) => {
+            const w = totals[code];
+            const limit = WASTE_LIMITS[code];
+            const perc = Math.min((w / limit) * 100, 100);
+            
+            const weightEl = document.getElementById(`weight${i+1}`);
+            if (weightEl) weightEl.textContent = `${w.toFixed(1)} kg`;
+            
+            const bar = document.getElementById(`progressBar${i+1}`);
+            if (bar) {
                 bar.style.width = `${perc}%`;
-                if(perc > 80) bar.classList.replace('bg-emerald-500', 'bg-amber-500');
-                if(perc >= 100) bar.classList.replace('bg-amber-500', 'bg-red-600');
-            });
+                // English comment: Color logic based on limits
+                bar.className = "h-full transition-all duration-500 " + 
+                    (perc >= 100 ? "bg-red-600" : perc > 80 ? "bg-amber-500" : "bg-emerald-500");
+            }
+        });
+    }
+
+    async function handleAddEntry(e) {
+        e.preventDefault();
+        const btn = e.target.querySelector('button');
+        const originalText = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = 'Zapisywanie...';
+
+        const { error } = await supabaseClient.from('waste_entries').insert([{
+            user_id: currentUser.id,
+            waste_code: document.getElementById('wasteCode').value,
+            weight_kg: parseFloat(document.getElementById('wasteWeight').value),
+            entry_date: document.getElementById('entryDate').value
+        }]);
+
+        if (error) { 
+            alert("Błąd: " + error.message); 
+            btn.disabled = false;
+            btn.textContent = originalText;
+        } else { 
+            closeAddEntryModal(); 
+            await loadDashboard(); 
+            btn.disabled = false; 
+            btn.textContent = originalText; 
         }
+    }
 
-        async function handleAddEntry(e) {
-            e.preventDefault();
-            const btn = e.target.querySelector('button');
-            btn.disabled = true;
-            btn.textContent = 'Zapisywanie...';
-
-            const { error } = await supabaseClient.from('waste_entries').insert([{
-                user_id: currentUser.id,
-                waste_code: document.getElementById('wasteCode').value,
-                weight_kg: parseFloat(document.getElementById('wasteWeight').value),
-                entry_date: document.getElementById('entryDate').value
-            }]);
-
-            if (error) { alert(error.message); btn.disabled = false; }
-            else { closeAddEntryModal(); loadDashboard(); btn.disabled = false; btn.textContent = 'Zapisz w bazie'; }
-        }
-
-        function openAddEntryModal() { document.getElementById('addEntryModal').style.display = 'block'; }
-        function closeAddEntryModal() { document.getElementById('addEntryModal').style.display = 'none'; }
-        function scrollToReports() { document.getElementById('reports').scrollIntoView({behavior: 'smooth'}); }
-        async function handleLogout() { await supabaseClient.auth.signOut(); window.location.href = 'login.html'; }
-    </script>
+    function openAddEntryModal() { document.getElementById('addEntryModal').style.display = 'block'; }
+    function closeAddEntryModal() { document.getElementById('addEntryModal').style.display = 'none'; }
+    function scrollToReports() { document.getElementById('reports').scrollIntoView({behavior: 'smooth'}); }
+    async function handleLogout() { await supabaseClient.auth.signOut(); window.location.href = 'login.html'; }
+</script>
 </body>
 </html>

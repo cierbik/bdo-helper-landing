@@ -204,6 +204,53 @@
         document.getElementById('loadingState').classList.add('hidden');
         document.getElementById('dashboardContent').classList.remove('hidden');
     }
+    function renderUI(entries) {
+        console.log("🎨 Rendering UI with entries:", entries);
+        
+        const totals = {'15 01 01': 0, '15 01 02': 0, '13 02 08': 0};
+        let grandTotal = 0;
+
+        entries.forEach(e => {
+            const w = parseFloat(e.weight_kg) || 0;
+            if (totals.hasOwnProperty(e.waste_code)) totals[e.waste_code] += w;
+            grandTotal += w;
+        });
+
+        // 1. Update Annual Summary (The table at the top)
+        const summaryEl = document.getElementById('reportsSummary');
+        if (summaryEl) {
+            summaryEl.innerHTML = Object.entries(totals).map(([code, weight]) => `
+                <div class="flex justify-between items-center p-4 bg-gray-50 rounded-xl border border-gray-100">
+                    <span class="font-bold text-slate-700">${code}</span>
+                    <span class="font-bold text-emerald-600">${weight.toFixed(1)} kg</span>
+                </div>
+            `).join('');
+        }
+
+        // 2. Update Grand Totals
+        const totalWeightEl = document.getElementById('totalWeight');
+        const totalMgEl = document.getElementById('totalWeightMg');
+        if (totalWeightEl) totalWeightEl.textContent = `${grandTotal.toFixed(1)} kg`;
+        if (totalMgEl) totalMgEl.textContent = `${(grandTotal / 1000).toFixed(3)} Mg`;
+
+        // 3. Update Progress Bars & Limit Cards
+        Object.keys(totals).forEach((code, i) => {
+            const weight = totals[code];
+            const limit = WASTE_LIMITS[code] || 500;
+            const percentage = Math.min((weight / limit) * 100, 100);
+            
+            const weightDisplay = document.getElementById(`weight${i+1}`);
+            const progressBar = document.getElementById(`progressBar${i+1}`);
+            
+            if (weightDisplay) weightDisplay.textContent = `${weight.toFixed(1)} kg`;
+            if (progressBar) {
+                progressBar.style.width = `${percentage}%`;
+                // Set color based on usage
+                progressBar.className = "h-full transition-all duration-500 " + 
+                    (percentage >= 100 ? "bg-red-600" : percentage > 80 ? "bg-amber-500" : "bg-emerald-500");
+            }
+        });
+    }
 
         // Start everything when DOM is ready
         document.addEventListener('DOMContentLoaded', initDashboard);

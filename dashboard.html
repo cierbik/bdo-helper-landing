@@ -454,11 +454,12 @@
     // English comment: Initialize client with fallback protection
     let supabaseClient = null;
     try {
+        // Zmieniamy warunek: inicjalizuj, jeśli tekst został podmieniony (nie jest już "REPLACE_ME")
         if (SUPABASE_URL !== 'REPLACE_ME_URL' && SUPABASE_KEY !== 'REPLACE_ME_KEY') {
             supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
             console.log('✅ Dashboard: Supabase initialized');
         } else {
-            console.error('⚠️ Dashboard: Credentials missing!');
+            console.error('⚠️ Dashboard: Credentials missing! Check Netlify environment variables.');
         }
     } catch (error) {
         console.error('❌ Dashboard: Init failed:', error);

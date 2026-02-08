@@ -107,17 +107,17 @@
 
     <!-- Top Navigation Bar -->
     <nav class="bg-white shadow-md sticky top-0 z-50">
-        <div class="container mx-auto px-4 py-4 flex items-center justify-between">
+        <div class="container mx-auto px-4 md:px-6 py-4 flex items-center justify-between">
             <!-- Logo -->
             <div class="flex items-center space-x-2">
-                <svg class="w-8 h-8 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-6 h-6 md:w-8 md:h-8 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                 </svg>
-                <span class="text-xl font-bold text-slate-800">BDO Helper</span>
+                <span class="text-lg md:text-xl font-bold text-slate-800">BDO Helper</span>
             </div>
             
             <!-- User info and logout -->
-            <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-2 md:space-x-4">
                 <span id="userEmail" class="hidden md:block text-sm text-gray-600"></span>
                 <button onclick="handleLogout()" class="text-sm text-gray-600 hover:text-emerald-600 font-medium">
                     Wyloguj
@@ -127,7 +127,7 @@
     </nav>
 
     <!-- Main Content -->
-    <main class="container mx-auto px-4 py-8 pb-24">
+    <main class="container mx-auto px-4 md:px-6 py-6 md:py-8 pb-24">
         
         <!-- Loading State -->
         <div id="loadingState" class="flex flex-col items-center justify-center py-20">
@@ -139,169 +139,221 @@
         <div id="dashboardContent" class="hidden">
             
             <!-- Welcome Header -->
-            <div class="mb-8">
-                <h1 class="text-3xl md:text-4xl font-bold text-slate-800 mb-2">
-                    Witaj w panelu BDO Helper
+            <div class="mb-6 md:mb-8">
+                <h1 class="text-2xl md:text-4xl font-bold text-slate-800 mb-2">
+                    Panel BDO Helper
                 </h1>
-                <p class="text-gray-600">
-                    Zarządzaj odpadami i pilnuj limitów w jednym miejscu
+                <p class="text-gray-600 text-sm md:text-base">
+                    Twoje podsumowanie odpadów za rok <span id="currentYear"></span>
                 </p>
             </div>
 
-            <!-- Limit Cards Grid -->
-            <div class="grid md:grid-cols-3 gap-6 mb-8">
+            <!-- SECTION 1: ANNUAL REPORTS - MOVED TO TOP -->
+            <section id="reports" class="mb-8 md:mb-12">
+                <div class="bg-white rounded-2xl shadow-lg p-4 md:p-6 border-2 border-emerald-100">
+                    <div class="flex items-center justify-between mb-4 md:mb-6">
+                        <div>
+                            <h2 class="text-xl md:text-2xl font-bold text-slate-800">Raport roczny</h2>
+                            <p class="text-sm text-gray-500 mt-1">Podsumowanie wszystkich kodów odpadów</p>
+                        </div>
+                        <button onclick="exportToExcel()" class="hidden md:flex items-center space-x-2 bg-emerald-100 text-emerald-700 px-4 py-2 rounded-lg hover:bg-emerald-200 transition-colors text-sm font-semibold">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                            <span>Eksportuj</span>
+                        </button>
+                    </div>
+
+                    <!-- English comment: Summary cards for each waste code -->
+                    <div id="reportsSummary" class="space-y-3">
+                        <!-- English comment: Will be populated by JavaScript -->
+                        <div class="text-center py-8 text-gray-500">
+                            Brak danych do wyświetlenia
+                        </div>
+                    </div>
+
+                    <!-- English comment: Total summary -->
+                    <div class="mt-6 pt-6 border-t-2 border-gray-200">
+                        <div class="flex justify-between items-center">
+                            <span class="text-lg font-bold text-slate-800">SUMA CAŁKOWITA:</span>
+                            <div class="text-right">
+                                <div id="totalWeight" class="text-2xl md:text-3xl font-bold text-emerald-700">0 kg</div>
+                                <div id="totalWeightMg" class="text-sm text-gray-500">0 Mg</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 2: LIMIT CARDS -->
+            <section class="mb-8 md:mb-12">
+                <h2 class="text-xl md:text-2xl font-bold text-slate-800 mb-4">Monitorowanie limitów</h2>
                 
-                <!-- Limit Card 1: Paper packaging -->
-                <div id="limitCard1" class="bg-white rounded-2xl shadow-lg p-6 border-2 border-gray-200">
-                    <div class="flex items-start justify-between mb-4">
-                        <div class="flex-1">
-                            <div class="text-xs text-gray-500 mb-1">Kod odpadu</div>
-                            <h3 class="text-lg font-bold text-slate-800">15 01 01</h3>
-                            <p class="text-sm text-gray-600">Opakowania z papieru</p>
+                <div class="grid md:grid-cols-3 gap-4 md:gap-6">
+                    
+                    <!-- Limit Card 1: Paper packaging -->
+                    <div id="limitCard1" class="bg-white rounded-2xl shadow-lg p-4 md:p-6 border-2 border-gray-200">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex-1">
+                                <div class="text-xs text-gray-500 mb-1">Kod odpadu</div>
+                                <h3 class="text-base md:text-lg font-bold text-slate-800">15 01 01</h3>
+                                <p class="text-xs md:text-sm text-gray-600">Opakowania z papieru</p>
+                            </div>
+                            <div class="w-10 h-10 md:w-12 md:h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                                <svg class="w-5 h-5 md:w-7 md:h-7 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
+                            </div>
                         </div>
-                        <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                            <svg class="w-7 h-7 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        
+                        <!-- Weight display -->
+                        <div class="mb-3">
+                            <div class="flex items-baseline justify-between mb-1">
+                                <span class="text-xs md:text-sm font-semibold text-slate-700">Wykorzystano</span>
+                                <span id="weight1" class="text-lg md:text-xl font-bold text-slate-800">0 kg</span>
+                            </div>
+                            <div class="text-xs text-gray-500">Limit: 500 kg (0.5 Mg)</div>
+                        </div>
+                        
+                        <!-- Progress bar -->
+                        <div class="w-full bg-gray-200 rounded-full h-2 md:h-3 overflow-hidden mb-2">
+                            <div id="progressBar1" class="progress-bar bg-emerald-500 h-2 md:h-3 rounded-full" style="width: 0%"></div>
+                        </div>
+                        
+                        <!-- Status message -->
+                        <div id="statusMessage1" class="flex items-center text-xs text-emerald-600">
+                            <svg class="w-3 h-3 md:w-4 md:h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                             </svg>
+                            <span>Bezpieczna strefa</span>
                         </div>
                     </div>
-                    
-                    <!-- Weight display -->
-                    <div class="mb-3">
-                        <div class="flex items-baseline justify-between mb-1">
-                            <span class="text-sm font-semibold text-slate-700">Wykorzystano</span>
-                            <span id="weight1" class="text-xl font-bold text-slate-800">0 kg</span>
-                        </div>
-                        <div class="text-xs text-gray-500">Limit: 500 kg (0.5 Mg)</div>
-                    </div>
-                    
-                    <!-- Progress bar -->
-                    <div class="w-full bg-gray-200 rounded-full h-3 overflow-hidden mb-2">
-                        <div id="progressBar1" class="progress-bar bg-emerald-500 h-3 rounded-full" style="width: 0%"></div>
-                    </div>
-                    
-                    <!-- Status message -->
-                    <div id="statusMessage1" class="flex items-center text-xs text-emerald-600">
-                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                        </svg>
-                        <span>Bezpieczna strefa</span>
-                    </div>
-                </div>
 
-                <!-- Limit Card 2: Plastic packaging -->
-                <div id="limitCard2" class="bg-white rounded-2xl shadow-lg p-6 border-2 border-gray-200">
-                    <div class="flex items-start justify-between mb-4">
-                        <div class="flex-1">
-                            <div class="text-xs text-gray-500 mb-1">Kod odpadu</div>
-                            <h3 class="text-lg font-bold text-slate-800">15 01 02</h3>
-                            <p class="text-sm text-gray-600">Opakowania z tworzyw</p>
+                    <!-- Limit Card 2: Plastic packaging -->
+                    <div id="limitCard2" class="bg-white rounded-2xl shadow-lg p-4 md:p-6 border-2 border-gray-200">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex-1">
+                                <div class="text-xs text-gray-500 mb-1">Kod odpadu</div>
+                                <h3 class="text-base md:text-lg font-bold text-slate-800">15 01 02</h3>
+                                <p class="text-xs md:text-sm text-gray-600">Opakowania z tworzyw</p>
+                            </div>
+                            <div class="w-10 h-10 md:w-12 md:h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+                                <svg class="w-5 h-5 md:w-7 md:h-7 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                </svg>
+                            </div>
                         </div>
-                        <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
-                            <svg class="w-7 h-7 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                        
+                        <!-- Weight display -->
+                        <div class="mb-3">
+                            <div class="flex items-baseline justify-between mb-1">
+                                <span class="text-xs md:text-sm font-semibold text-slate-700">Wykorzystano</span>
+                                <span id="weight2" class="text-lg md:text-xl font-bold text-slate-800">0 kg</span>
+                            </div>
+                            <div class="text-xs text-gray-500">Limit: 500 kg (0.5 Mg)</div>
+                        </div>
+                        
+                        <!-- Progress bar -->
+                        <div class="w-full bg-gray-200 rounded-full h-2 md:h-3 overflow-hidden mb-2">
+                            <div id="progressBar2" class="progress-bar bg-emerald-500 h-2 md:h-3 rounded-full" style="width: 0%"></div>
+                        </div>
+                        
+                        <!-- Status message -->
+                        <div id="statusMessage2" class="flex items-center text-xs text-emerald-600">
+                            <svg class="w-3 h-3 md:w-4 md:h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                             </svg>
+                            <span>Bezpieczna strefa</span>
                         </div>
                     </div>
-                    
-                    <!-- Weight display -->
-                    <div class="mb-3">
-                        <div class="flex items-baseline justify-between mb-1">
-                            <span class="text-sm font-semibold text-slate-700">Wykorzystano</span>
-                            <span id="weight2" class="text-xl font-bold text-slate-800">0 kg</span>
-                        </div>
-                        <div class="text-xs text-gray-500">Limit: 500 kg (0.5 Mg)</div>
-                    </div>
-                    
-                    <!-- Progress bar -->
-                    <div class="w-full bg-gray-200 rounded-full h-3 overflow-hidden mb-2">
-                        <div id="progressBar2" class="progress-bar bg-emerald-500 h-3 rounded-full" style="width: 0%"></div>
-                    </div>
-                    
-                    <!-- Status message -->
-                    <div id="statusMessage2" class="flex items-center text-xs text-emerald-600">
-                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                        </svg>
-                        <span>Bezpieczna strefa</span>
-                    </div>
-                </div>
 
-                <!-- Limit Card 3: Engine oils -->
-                <div id="limitCard3" class="bg-white rounded-2xl shadow-lg p-6 border-2 border-gray-200">
-                    <div class="flex items-start justify-between mb-4">
-                        <div class="flex-1">
-                            <div class="text-xs text-gray-500 mb-1">Kod odpadu</div>
-                            <h3 class="text-lg font-bold text-slate-800">13 02 08</h3>
-                            <p class="text-sm text-gray-600">Inne oleje silnikowe</p>
+                    <!-- Limit Card 3: Engine oils -->
+                    <div id="limitCard3" class="bg-white rounded-2xl shadow-lg p-4 md:p-6 border-2 border-gray-200">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex-1">
+                                <div class="text-xs text-gray-500 mb-1">Kod odpadu</div>
+                                <h3 class="text-base md:text-lg font-bold text-slate-800">13 02 08</h3>
+                                <p class="text-xs md:text-sm text-gray-600">Inne oleje silnikowe</p>
+                            </div>
+                            <div class="w-10 h-10 md:w-12 md:h-12 bg-amber-100 rounded-xl flex items-center justify-center">
+                                <svg class="w-5 h-5 md:w-7 md:h-7 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/>
+                                </svg>
+                            </div>
                         </div>
-                        <div class="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center">
-                            <svg class="w-7 h-7 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/>
+                        
+                        <!-- Weight display -->
+                        <div class="mb-3">
+                            <div class="flex items-baseline justify-between mb-1">
+                                <span class="text-xs md:text-sm font-semibold text-slate-700">Wykorzystano</span>
+                                <span id="weight3" class="text-lg md:text-xl font-bold text-slate-800">0 kg</span>
+                            </div>
+                            <div class="text-xs text-gray-500">Alert próg: 100 kg</div>
+                        </div>
+                        
+                        <!-- Progress bar -->
+                        <div class="w-full bg-gray-200 rounded-full h-2 md:h-3 overflow-hidden mb-2">
+                            <div id="progressBar3" class="progress-bar bg-emerald-500 h-2 md:h-3 rounded-full" style="width: 0%"></div>
+                        </div>
+                        
+                        <!-- Status message -->
+                        <div id="statusMessage3" class="flex items-center text-xs text-emerald-600">
+                            <svg class="w-3 h-3 md:w-4 md:h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                             </svg>
+                            <span>Bezpieczna strefa</span>
                         </div>
                     </div>
-                    
-                    <!-- Weight display -->
-                    <div class="mb-3">
-                        <div class="flex items-baseline justify-between mb-1">
-                            <span class="text-sm font-semibold text-slate-700">Wykorzystano</span>
-                            <span id="weight3" class="text-xl font-bold text-slate-800">0 kg</span>
+
+                </div>
+            </section>
+
+            <!-- SECTION 3: RECENT ENTRIES -->
+            <section class="mb-8">
+                <div class="bg-white rounded-2xl shadow-lg p-4 md:p-6 border-2 border-gray-200">
+                    <div class="flex items-center justify-between mb-4 md:mb-6">
+                        <div>
+                            <h2 class="text-xl md:text-2xl font-bold text-slate-800">Ostatnie wpisy</h2>
+                            <p class="text-xs md:text-sm text-gray-500 mt-1">5 najnowszych wpisów</p>
                         </div>
-                        <div class="text-xs text-gray-500">Alert próg: 100 kg</div>
+                        <!-- English comment: Add entry button visible only on desktop -->
+                        <button onclick="openAddEntryModal()" class="hidden md:flex items-center space-x-2 bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors font-semibold">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                            </svg>
+                            <span>Dodaj wpis</span>
+                        </button>
                     </div>
-                    
-                    <!-- Progress bar -->
-                    <div class="w-full bg-gray-200 rounded-full h-3 overflow-hidden mb-2">
-                        <div id="progressBar3" class="progress-bar bg-emerald-500 h-3 rounded-full" style="width: 0%"></div>
-                    </div>
-                    
-                    <!-- Status message -->
-                    <div id="statusMessage3" class="flex items-center text-xs text-emerald-600">
-                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                        </svg>
-                        <span>Bezpieczna strefa</span>
+
+                    <!-- Entries Table -->
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="border-b-2 border-gray-200">
+                                    <th class="text-left py-3 px-2 text-xs md:text-sm font-semibold text-gray-600">Data</th>
+                                    <th class="text-left py-3 px-2 text-xs md:text-sm font-semibold text-gray-600">Kod</th>
+                                    <th class="text-right py-3 px-2 text-xs md:text-sm font-semibold text-gray-600">Waga [kg]</th>
+                                </tr>
+                            </thead>
+                            <tbody id="entriesTableBody">
+                                <!-- English comment: Table rows will be populated by JavaScript -->
+                                <tr>
+                                    <td colspan="3" class="text-center py-8 text-gray-500 text-sm">
+                                        Brak wpisów. Dodaj pierwszy wpis!
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
-
-            </div>
-
-            <!-- Recent Entries Section -->
-            <div class="bg-white rounded-2xl shadow-lg p-6 border-2 border-gray-200 mb-8">
-                <div class="flex items-center justify-between mb-6">
-                    <h2 class="text-2xl font-bold text-slate-800">Ostatnie wpisy</h2>
-                    <span class="text-sm text-gray-500">5 najnowszych</span>
-                </div>
-
-                <!-- Entries Table -->
-                <div class="overflow-x-auto">
-                    <table class="w-full">
-                        <thead>
-                            <tr class="border-b-2 border-gray-200">
-                                <th class="text-left py-3 px-2 text-sm font-semibold text-gray-600">Data</th>
-                                <th class="text-left py-3 px-2 text-sm font-semibold text-gray-600">Kod</th>
-                                <th class="text-right py-3 px-2 text-sm font-semibold text-gray-600">Waga [kg]</th>
-                            </tr>
-                        </thead>
-                        <tbody id="entriesTableBody">
-                            <!-- English comment: Table rows will be populated by JavaScript -->
-                            <tr>
-                                <td colspan="3" class="text-center py-8 text-gray-500">
-                                    Brak wpisów. Dodaj pierwszy wpis!
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+            </section>
 
         </div>
 
     </main>
 
-    <!-- Floating Action Button (FAB) for adding new entry -->
-    <button onclick="openAddEntryModal()" class="fixed bottom-6 right-6 w-16 h-16 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-transform z-50">
+    <!-- English comment: Floating Action Button - HIDDEN on mobile, visible on desktop -->
+    <button onclick="openAddEntryModal()" class="hidden md:flex fixed bottom-6 right-6 w-16 h-16 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-full shadow-2xl items-center justify-center hover:scale-110 transition-transform z-50">
         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
         </svg>
@@ -310,19 +362,19 @@
     <!-- Bottom Navigation (Mobile) -->
     <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40">
         <div class="grid grid-cols-3 gap-0">
-            <button class="py-4 flex flex-col items-center text-emerald-600">
+            <button class="py-3 flex flex-col items-center text-emerald-600">
                 <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
                 </svg>
                 <span class="text-xs font-medium">Panel</span>
             </button>
-            <button onclick="openAddEntryModal()" class="py-4 flex flex-col items-center text-gray-600">
+            <button onclick="openAddEntryModal()" class="py-3 flex flex-col items-center text-gray-600">
                 <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                 </svg>
                 <span class="text-xs font-medium">Dodaj</span>
             </button>
-            <button class="py-4 flex flex-col items-center text-gray-600">
+            <button onclick="scrollToReports()" class="py-3 flex flex-col items-center text-gray-600">
                 <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
                 </svg>
@@ -333,26 +385,26 @@
 
     <!-- Modal: Add New Entry -->
     <div id="addEntryModal" class="modal">
-        <div class="modal-content">
+        <div class="modal-content mx-4">
             <!-- Modal header -->
-            <div class="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white p-6 rounded-t-2xl">
+            <div class="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white p-4 md:p-6 rounded-t-2xl">
                 <div class="flex justify-between items-center">
-                    <h3 class="text-2xl font-bold">Dodaj nowy wpis</h3>
+                    <h3 class="text-xl md:text-2xl font-bold">Dodaj nowy wpis</h3>
                     <button onclick="closeAddEntryModal()" class="text-white hover:text-gray-200 text-3xl leading-none">&times;</button>
                 </div>
             </div>
             
             <!-- Modal body -->
-            <div class="p-6">
+            <div class="p-4 md:p-6">
                 <form id="addEntryForm" onsubmit="handleAddEntry(event)">
                     <!-- Waste code selection -->
-                    <div class="mb-6">
-                        <label for="wasteCode" class="block text-gray-700 font-semibold mb-2">Kod odpadu</label>
+                    <div class="mb-4 md:mb-6">
+                        <label for="wasteCode" class="block text-gray-700 font-semibold mb-2 text-sm md:text-base">Kod odpadu</label>
                         <select 
                             id="wasteCode" 
                             name="wasteCode" 
                             required
-                            class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-emerald-500 focus:outline-none text-gray-800">
+                            class="w-full px-3 py-2 md:px-4 md:py-3 border-2 border-gray-300 rounded-lg focus:border-emerald-500 focus:outline-none text-gray-800 text-sm md:text-base">
                             <option value="">Wybierz kod...</option>
                             <option value="15 01 01">15 01 01 - Opakowania z papieru</option>
                             <option value="15 01 02">15 01 02 - Opakowania z tworzyw</option>
@@ -361,8 +413,8 @@
                     </div>
                     
                     <!-- Weight input -->
-                    <div class="mb-6">
-                        <label for="wasteWeight" class="block text-gray-700 font-semibold mb-2">Waga [kg]</label>
+                    <div class="mb-4 md:mb-6">
+                        <label for="wasteWeight" class="block text-gray-700 font-semibold mb-2 text-sm md:text-base">Waga [kg]</label>
                         <input 
                             type="number" 
                             id="wasteWeight" 
@@ -371,21 +423,21 @@
                             step="0.1"
                             min="0.1"
                             placeholder="np. 25.5"
-                            class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-emerald-500 focus:outline-none text-gray-800">
+                            class="w-full px-3 py-2 md:px-4 md:py-3 border-2 border-gray-300 rounded-lg focus:border-emerald-500 focus:outline-none text-gray-800 text-sm md:text-base">
                     </div>
                     
                     <!-- Date input -->
-                    <div class="mb-6">
-                        <label for="entryDate" class="block text-gray-700 font-semibold mb-2">Data przekazania</label>
+                    <div class="mb-4 md:mb-6">
+                        <label for="entryDate" class="block text-gray-700 font-semibold mb-2 text-sm md:text-base">Data przekazania</label>
                         <input 
                             type="date" 
                             id="entryDate" 
                             name="entryDate" 
                             required
-                            class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-emerald-500 focus:outline-none text-gray-800">
+                            class="w-full px-3 py-2 md:px-4 md:py-3 border-2 border-gray-300 rounded-lg focus:border-emerald-500 focus:outline-none text-gray-800 text-sm md:text-base">
                     </div>
                     
-                    <button type="submit" class="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-6 py-4 rounded-full font-bold text-lg hover:shadow-xl transition-all">
+                    <button type="submit" class="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-6 py-3 md:py-4 rounded-full font-bold text-base md:text-lg hover:shadow-xl transition-all">
                         Dodaj wpis
                     </button>
                 </form>
@@ -398,7 +450,21 @@
         // English comment: Supabase configuration - replace with your actual credentials
         const SUPABASE_URL = 'REPLACE_ME_URL';
         const SUPABASE_KEY = 'REPLACE_ME_KEY';
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        
+        // English comment: Validate configuration and initialize Supabase client
+        let supabaseClient = null;
+        
+        try {
+            if (SUPABASE_URL === 'REPLACE_ME_URL' || SUPABASE_KEY === 'REPLACE_ME_KEY') {
+                console.error('⚠️ Supabase credentials not configured!');
+                alert('Błąd konfiguracji: Aplikacja wymaga konfiguracji Supabase. Sprawdź SUPABASE_SETUP.md');
+            } else {
+                supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+                console.log('✅ Supabase client initialized');
+            }
+        } catch (error) {
+            console.error('❌ Failed to initialize Supabase:', error);
+        }
 
         // English comment: Waste code limits configuration (in kg)
         const WASTE_LIMITS = {
@@ -409,10 +475,14 @@
 
         // English comment: Global variable to store current user
         let currentUser = null;
+        let allEntriesData = []; // English comment: Store all entries for report generation
 
         // English comment: Initialize app on page load
         document.addEventListener('DOMContentLoaded', async () => {
             await checkAuth();
+            
+            // English comment: Set current year display
+            document.getElementById('currentYear').textContent = new Date().getFullYear();
             
             // English comment: Set today's date as default in the form
             document.getElementById('entryDate').valueAsDate = new Date();
@@ -420,6 +490,11 @@
 
         // English comment: Check if user is authenticated
         async function checkAuth() {
+            if (!supabaseClient) {
+                window.location.href = 'login.html';
+                return;
+            }
+
             const { data: { user }, error } = await supabaseClient.auth.getUser();
             
             if (error || !user) {
@@ -448,6 +523,7 @@
                 const yearEnd = `${currentYear}-12-31`;
                 
                 // English comment: Fetch waste entries from Supabase for current year
+                // IMPORTANT: Filter by user_id to ensure users only see their own data
                 const { data: entries, error } = await supabaseClient
                     .from('waste_entries')
                     .select('*')
@@ -462,11 +538,17 @@
                     return;
                 }
                 
-                // English comment: Calculate totals per waste code
-                calculateLimits(entries || []);
+                // English comment: Store entries globally for other functions
+                allEntriesData = entries || [];
+                
+                // English comment: Generate annual report summary
+                generateAnnualReport(allEntriesData);
+                
+                // English comment: Calculate totals per waste code for limit cards
+                calculateLimits(allEntriesData);
                 
                 // English comment: Display recent entries in table
-                displayRecentEntries(entries || []);
+                displayRecentEntries(allEntriesData);
                 
                 // English comment: Hide loading, show dashboard
                 document.getElementById('loadingState').classList.add('hidden');
@@ -476,6 +558,75 @@
                 console.error('Dashboard error:', error);
                 alert('Wystąpił błąd podczas ładowania panelu');
             }
+        }
+
+        // English comment: Generate annual report summary grouped by waste code
+        function generateAnnualReport(entries) {
+            const reportContainer = document.getElementById('reportsSummary');
+            
+            if (!entries || entries.length === 0) {
+                reportContainer.innerHTML = `
+                    <div class="text-center py-8 text-gray-500">
+                        <p class="mb-2">Brak wpisów za bieżący rok</p>
+                        <p class="text-sm">Dodaj pierwszy wpis, aby zobaczyć raport</p>
+                    </div>
+                `;
+                document.getElementById('totalWeight').textContent = '0 kg';
+                document.getElementById('totalWeightMg').textContent = '0.000 Mg';
+                return;
+            }
+            
+            // English comment: Group entries by waste code and sum weights
+            const summary = {};
+            let grandTotal = 0;
+            
+            entries.forEach(entry => {
+                const code = entry.waste_code;
+                const weight = parseFloat(entry.weight_kg || 0);
+                
+                if (!summary[code]) {
+                    summary[code] = {
+                        code: code,
+                        totalKg: 0,
+                        count: 0
+                    };
+                }
+                
+                summary[code].totalKg += weight;
+                summary[code].count += 1;
+                grandTotal += weight;
+            });
+            
+            // English comment: Sort by total weight (descending)
+            const sortedCodes = Object.keys(summary).sort((a, b) => 
+                summary[b].totalKg - summary[a].totalKg
+            );
+            
+            // English comment: Generate HTML for each waste code
+            reportContainer.innerHTML = sortedCodes.map(code => {
+                const data = summary[code];
+                const weightMg = (data.totalKg / 1000).toFixed(3);
+                
+                return `
+                    <div class="bg-gradient-to-r from-slate-50 to-gray-50 rounded-xl p-4 border border-gray-200 hover:shadow-md transition-shadow">
+                        <div class="flex items-center justify-between">
+                            <div class="flex-1">
+                                <div class="font-bold text-slate-800 mb-1">${code}</div>
+                                <div class="text-xs text-gray-500">${data.count} ${data.count === 1 ? 'wpis' : 'wpisów'}</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-xl md:text-2xl font-bold text-emerald-700">${data.totalKg.toFixed(1)} kg</div>
+                                <div class="text-xs text-gray-500">${weightMg} Mg</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            // English comment: Update total weight display
+            const totalMg = (grandTotal / 1000).toFixed(3);
+            document.getElementById('totalWeight').textContent = `${grandTotal.toFixed(1)} kg`;
+            document.getElementById('totalWeightMg').textContent = `${totalMg} Mg`;
         }
 
         // English comment: Calculate weight totals and update limit cards
@@ -514,10 +665,10 @@
                 
                 if (percentage >= 100) {
                     // English comment: Over limit - RED alert
-                    progressBar.className = 'progress-bar bg-red-600 h-3 rounded-full';
-                    limitCard.className = 'bg-white rounded-2xl shadow-lg p-6 border-2 border-red-400';
+                    progressBar.className = 'progress-bar bg-red-600 h-2 md:h-3 rounded-full';
+                    limitCard.className = 'bg-white rounded-2xl shadow-lg p-4 md:p-6 border-2 border-red-400';
                     statusMessage.innerHTML = `
-                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <svg class="w-3 h-3 md:w-4 md:h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
                         </svg>
                         <span>Przekroczono limit!</span>
@@ -525,10 +676,10 @@
                     statusMessage.className = 'flex items-center text-xs text-red-600 font-semibold';
                 } else if (percentage >= 80) {
                     // English comment: 80-99% - YELLOW/AMBER warning
-                    progressBar.className = 'progress-bar bg-amber-500 h-3 rounded-full';
-                    limitCard.className = 'bg-white rounded-2xl shadow-lg p-6 border-2 border-amber-400';
+                    progressBar.className = 'progress-bar bg-amber-500 h-2 md:h-3 rounded-full';
+                    limitCard.className = 'bg-white rounded-2xl shadow-lg p-4 md:p-6 border-2 border-amber-400';
                     statusMessage.innerHTML = `
-                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <svg class="w-3 h-3 md:w-4 md:h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
                         </svg>
                         <span>Uwaga - zbliżasz się do limitu!</span>
@@ -536,10 +687,10 @@
                     statusMessage.className = 'flex items-center text-xs text-amber-600 font-semibold';
                 } else {
                     // English comment: Under 80% - GREEN safe zone
-                    progressBar.className = 'progress-bar bg-emerald-500 h-3 rounded-full';
-                    limitCard.className = 'bg-white rounded-2xl shadow-lg p-6 border-2 border-gray-200';
+                    progressBar.className = 'progress-bar bg-emerald-500 h-2 md:h-3 rounded-full';
+                    limitCard.className = 'bg-white rounded-2xl shadow-lg p-4 md:p-6 border-2 border-gray-200';
                     statusMessage.innerHTML = `
-                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <svg class="w-3 h-3 md:w-4 md:h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                         </svg>
                         <span>Bezpieczna strefa</span>
@@ -556,7 +707,7 @@
             if (!entries || entries.length === 0) {
                 tableBody.innerHTML = `
                     <tr>
-                        <td colspan="3" class="text-center py-8 text-gray-500">
+                        <td colspan="3" class="text-center py-8 text-gray-500 text-sm">
                             Brak wpisów. Dodaj pierwszy wpis!
                         </td>
                     </tr>
@@ -571,12 +722,43 @@
                 const date = new Date(entry.entry_date).toLocaleDateString('pl-PL');
                 return `
                     <tr class="border-b border-gray-100 hover:bg-gray-50">
-                        <td class="py-3 px-2 text-sm text-gray-700">${date}</td>
-                        <td class="py-3 px-2 text-sm font-medium text-slate-800">${entry.waste_code}</td>
-                        <td class="py-3 px-2 text-sm text-right font-semibold text-emerald-700">${entry.weight_kg} kg</td>
+                        <td class="py-3 px-2 text-xs md:text-sm text-gray-700">${date}</td>
+                        <td class="py-3 px-2 text-xs md:text-sm font-medium text-slate-800">${entry.waste_code}</td>
+                        <td class="py-3 px-2 text-xs md:text-sm text-right font-semibold text-emerald-700">${entry.weight_kg} kg</td>
                     </tr>
                 `;
             }).join('');
+        }
+
+        // English comment: Export report to Excel (simple CSV export)
+        function exportToExcel() {
+            if (allEntriesData.length === 0) {
+                alert('Brak danych do eksportu');
+                return;
+            }
+            
+            // English comment: Create CSV content
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "Data,Kod odpadu,Waga [kg]\n";
+            
+            allEntriesData.forEach(entry => {
+                const date = new Date(entry.entry_date).toLocaleDateString('pl-PL');
+                csvContent += `${date},${entry.waste_code},${entry.weight_kg}\n`;
+            });
+            
+            // English comment: Trigger download
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `raport_BDO_${new Date().getFullYear()}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // English comment: Scroll to reports section (mobile navigation)
+        function scrollToReports() {
+            document.getElementById('reports').scrollIntoView({ behavior: 'smooth' });
         }
 
         // English comment: Modal functions
@@ -604,12 +786,18 @@
         async function handleAddEntry(event) {
             event.preventDefault();
             
+            if (!supabaseClient) {
+                alert('Błąd: Brak połączenia z bazą danych');
+                return;
+            }
+            
             const wasteCode = document.getElementById('wasteCode').value;
             const weight = parseFloat(document.getElementById('wasteWeight').value);
             const entryDate = document.getElementById('entryDate').value;
             
             try {
                 // English comment: Insert new entry into Supabase
+                // IMPORTANT: user_id is automatically set to current user
                 const { data, error } = await supabaseClient
                     .from('waste_entries')
                     .insert([
@@ -639,6 +827,11 @@
 
         // English comment: Handle user logout
         async function handleLogout() {
+            if (!supabaseClient) {
+                window.location.href = 'login.html';
+                return;
+            }
+            
             const { error } = await supabaseClient.auth.signOut();
             
             if (error) {

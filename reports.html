@@ -286,23 +286,15 @@
     <!-- JavaScript -->
     <script>
         // English comment: Supabase configuration - will be replaced by sed in Netlify
-        const SUPABASE_URL = 'REPLACE_ME_URL';
+         const SUPABASE_URL = 'REPLACE_ME_URL';
         const SUPABASE_KEY = 'REPLACE_ME_KEY';
-        
-        // English comment: Validate configuration and initialize Supabase client
         let supabaseClient = null;
-        
+
         try {
-            if (SUPABASE_URL === 'REPLACE_ME_URL' || SUPABASE_KEY === 'REPLACE_ME_KEY') {
-                console.error('⚠️ Supabase credentials not configured!');
-                alert('Błąd konfiguracji: Aplikacja wymaga konfiguracji Supabase.');
-            } else {
+            if (SUPABASE_URL !== 'REPLACE_ME_URL') {
                 supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-                console.log('✅ Supabase client initialized');
             }
-        } catch (error) {
-            console.error('❌ Failed to initialize Supabase:', error);
-        }
+        } catch (e) { console.error("Config error", e); }
 
         // English comment: Waste code descriptions mapping
         const WASTE_CODE_NAMES = {

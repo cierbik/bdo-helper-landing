@@ -104,48 +104,53 @@
         const SUPABASE_KEY = 'REPLACE_ME_KEY';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // English comment: Check if user is already logged in
         document.addEventListener('DOMContentLoaded', async () => {
-            const { data: { user } } = await supabaseClient.auth.getUser();
+            if (!supabaseClient) return; // English comment: Stop if no client
             
+            const { data: { user } } = await supabaseClient.auth.getUser();
             if (user) {
-                // English comment: Already authenticated, redirect to dashboard
                 window.location.href = 'dashboard.html';
             }
         });
 
-        // English comment: Handle login form submission
         async function handleLogin(event) {
             event.preventDefault();
-            
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             const errorMessage = document.getElementById('errorMessage');
-            
-            // English comment: Hide previous error messages
+            const btn = event.target.querySelector('button');
+
             errorMessage.classList.add('hidden');
-            
+
+            if (!supabaseClient) {
+                errorMessage.textContent = 'Błąd: Połączenie z bazą nie zostało skonfigurowane.';
+                errorMessage.classList.remove('hidden');
+                return;
+            }
+
             try {
-                // English comment: Sign in with Supabase Auth
+                btn.disabled = true;
+                btn.textContent = 'Logowanie...';
+
                 const { data, error } = await supabaseClient.auth.signInWithPassword({
                     email: email,
                     password: password
                 });
-                
+
                 if (error) {
-                    // English comment: Show error message
-                    errorMessage.textContent = 'Błąd logowania: ' + error.message;
+                    errorMessage.textContent = 'Błąd: ' + (error.message === 'Invalid login credentials' ? 'Błędny email lub hasło' : error.message);
                     errorMessage.classList.remove('hidden');
+                    btn.disabled = false;
+                    btn.textContent = 'Zaloguj się';
                     return;
                 }
-                
-                // English comment: Success - redirect to dashboard
+
                 window.location.href = 'dashboard.html';
-                
             } catch (error) {
-                console.error('Login error:', error);
-                errorMessage.textContent = 'Wystąpił nieoczekiwany błąd';
+                errorMessage.textContent = 'Wystąpił nieoczekiwany błąd serwera.';
                 errorMessage.classList.remove('hidden');
+                btn.disabled = false;
+                btn.textContent = 'Zaloguj się';
             }
         }
     </script>

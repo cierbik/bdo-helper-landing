@@ -11,174 +11,239 @@
         body { font-family: 'Manrope', sans-serif; }
         h1, h2, h3 { font-family: 'Poppins', sans-serif; }
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px); }
-        .modal-content { background-color: white; margin: 10% auto; border-radius: 16px; max-width: 500px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); }
+        .modal-content { background-color: white; margin: 10% auto; border-radius: 20px; max-width: 500px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
     </style>
 </head>
-<body class="bg-gray-50 pb-20">
+<body class="bg-gray-50 pb-24">
 
-    <nav class="bg-white shadow-md sticky top-0 z-50">
-        <div class="container mx-auto px-4 py-4 flex items-center justify-between">
+    <nav class="bg-white shadow-sm sticky top-0 z-50 px-4">
+        <div class="container mx-auto py-4 flex items-center justify-between">
             <div class="flex items-center space-x-2">
-                <svg class="w-8 h-8 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                <svg class="w-7 h-7 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                 <span class="text-xl font-bold text-slate-800">BDO Helper</span>
             </div>
             <div class="flex items-center space-x-4">
-                <span id="userEmail" class="hidden md:block text-sm text-gray-600"></span>
-                <button onclick="handleLogout()" class="text-sm text-gray-600 hover:text-emerald-600 font-medium">Wyloguj</button>
+                <span id="userEmail" class="hidden md:block text-sm text-gray-500"></span>
+                <button onclick="handleLogout()" class="text-sm font-semibold text-emerald-600">Wyloguj</button>
             </div>
         </div>
     </nav>
 
-    <main class="container mx-auto px-4 py-8">
+    <main class="container mx-auto px-4 py-6 max-w-5xl">
         <div id="loadingState" class="flex flex-col items-center justify-center py-20">
-            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mb-4"></div>
-            <p class="text-gray-600">Ładowanie danych...</p>
+            <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-emerald-600 mb-4"></div>
+            <p class="text-gray-500">Ładowanie danych...</p>
         </div>
 
         <div id="dashboardContent" class="hidden">
-            <div class="mb-8">
-                <h1 class="text-3xl font-bold text-slate-800 mb-2 text-center md:text-left">Panel BDO</h1>
-                <p class="text-gray-600 text-center md:text-left">Twoje zestawienie na rok <span id="currentYear"></span></p>
-            </div>
-
-            <section id="reportsSection" class="mb-8">
-                <div class="bg-white rounded-2xl shadow-lg p-6 border-2 border-emerald-100">
-                    <h2 class="text-xl font-bold text-slate-800 mb-4">Raport roczny (kg)</h2>
-                    <div id="annualSummary" class="space-y-3">
+            <section id="reports" class="mb-8">
+                <div class="bg-white rounded-2xl shadow-sm p-6 border border-emerald-100">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-xl font-bold text-slate-800">Podsumowanie roczne</h2>
+                        <span class="text-xs font-bold bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full uppercase">Rok <span id="currentYear"></span></span>
+                    </div>
+                    <div id="reportsSummary" class="grid gap-3">
                         </div>
-                    <div class="mt-6 pt-4 border-t border-gray-100 flex justify-between items-center">
-                        <span class="font-bold text-slate-700">SUMA:</span>
-                        <span id="totalKgDisplay" class="text-2xl font-bold text-emerald-600">0 kg</span>
+                    <div class="mt-6 pt-6 border-t border-gray-100 flex justify-between items-end">
+                        <span class="text-gray-400 font-medium">ŁĄCZNA MASA:</span>
+                        <div class="text-right">
+                            <div id="totalWeight" class="text-3xl font-bold text-emerald-600">0 kg</div>
+                            <div id="totalWeightMg" class="text-xs text-gray-400 font-bold uppercase tracking-wider">0.000 Mg</div>
+                        </div>
                     </div>
                 </div>
             </section>
 
-            <div class="grid md:grid-cols-3 gap-6 mb-8">
-                <div id="limitCard1" class="bg-white rounded-2xl shadow-lg p-6 border-2 border-gray-200">
-                    <div class="flex items-start justify-between mb-2">
-                        <div><div class="text-xs text-gray-500">15 01 01</div><h3 class="font-bold">Papier</h3></div>
-                        <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg></div>
+            <section class="mb-8">
+                <h2 class="text-lg font-bold text-slate-700 mb-4">Status limitów ewidencji</h2>
+                <div class="grid md:grid-cols-3 gap-4">
+                    <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
+                        <div class="text-[10px] font-black text-blue-500 uppercase mb-1">15 01 01</div>
+                        <div class="text-sm font-bold text-slate-800 mb-3">Papier i tektura</div>
+                        <div class="flex justify-between text-xs mb-2">
+                            <span id="weight1" class="font-bold">0 kg</span>
+                            <span class="text-gray-400">Limit: 500kg</span>
+                        </div>
+                        <div class="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
+                            <div id="progressBar1" class="bg-emerald-500 h-full transition-all duration-500" style="width: 0%"></div>
+                        </div>
                     </div>
-                    <div class="mb-2 flex justify-between"><span id="weight1" class="font-bold">0 kg</span><span class="text-xs text-gray-400">Limit 500kg</span></div>
-                    <div class="w-full bg-gray-100 h-2 rounded-full overflow-hidden"><div id="progressBar1" class="bg-emerald-500 h-full" style="width: 0%"></div></div>
-                </div>
-                <div id="limitCard2" class="bg-white rounded-2xl shadow-lg p-6 border-2 border-gray-200">
-                    <div class="flex items-start justify-between mb-2">
-                        <div><div class="text-xs text-gray-500">15 01 02</div><h3 class="font-bold">Tworzywa</h3></div>
-                        <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center text-purple-600"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg></div>
+                    <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
+                        <div class="text-[10px] font-black text-purple-500 uppercase mb-1">15 01 02</div>
+                        <div class="text-sm font-bold text-slate-800 mb-3">Tworzywa sztuczne</div>
+                        <div class="flex justify-between text-xs mb-2">
+                            <span id="weight2" class="font-bold">0 kg</span>
+                            <span class="text-gray-400">Limit: 500kg</span>
+                        </div>
+                        <div class="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
+                            <div id="progressBar2" class="bg-emerald-500 h-full transition-all duration-500" style="width: 0%"></div>
+                        </div>
                     </div>
-                    <div class="mb-2 flex justify-between"><span id="weight2" class="font-bold">0 kg</span><span class="text-xs text-gray-400">Limit 500kg</span></div>
-                    <div class="w-full bg-gray-100 h-2 rounded-full overflow-hidden"><div id="progressBar2" class="bg-emerald-500 h-full" style="width: 0%"></div></div>
-                </div>
-                <div id="limitCard3" class="bg-white rounded-2xl shadow-lg p-6 border-2 border-gray-200">
-                    <div class="flex items-start justify-between mb-2">
-                        <div><div class="text-xs text-gray-500">13 02 08</div><h3 class="font-bold">Oleje</h3></div>
-                        <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center text-amber-600"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg></div>
+                    <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
+                        <div class="text-[10px] font-black text-amber-500 uppercase mb-1">13 02 08</div>
+                        <div class="text-sm font-bold text-slate-800 mb-3">Inne oleje silnikowe</div>
+                        <div class="flex justify-between text-xs mb-2">
+                            <span id="weight3" class="font-bold">0 kg</span>
+                            <span class="text-gray-400">Alert: 100kg</span>
+                        </div>
+                        <div class="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
+                            <div id="progressBar3" class="bg-emerald-500 h-full transition-all duration-500" style="width: 0%"></div>
+                        </div>
                     </div>
-                    <div class="mb-2 flex justify-between"><span id="weight3" class="font-bold">0 kg</span><span class="text-xs text-gray-400">Alert 100kg</span></div>
-                    <div class="w-full bg-gray-100 h-2 rounded-full overflow-hidden"><div id="progressBar3" class="bg-emerald-500 h-full" style="width: 0%"></div></div>
                 </div>
-            </div>
-
-            <div class="bg-white rounded-2xl shadow-lg p-6 border-2 border-gray-200">
-                <h2 class="text-xl font-bold mb-4 text-slate-800">Historia wpisów</h2>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-sm">
-                        <thead><tr class="border-b-2 text-gray-600 text-left"><th class="py-2">Data</th><th class="py-2">Kod</th><th class="py-2 text-right">kg</th></tr></thead>
-                        <tbody id="entriesTableBody"></tbody>
-                    </table>
-                </div>
-            </div>
+            </section>
         </div>
     </main>
 
-    <button onclick="openAddEntryModal()" class="hidden md:flex fixed bottom-6 right-6 w-16 h-16 bg-emerald-600 text-white rounded-full shadow-2xl items-center justify-center hover:scale-110 transition-transform z-50">
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 flex justify-around py-3 z-50">
+        <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="flex flex-col items-center text-emerald-600">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+            <span class="text-[10px] mt-1 font-bold uppercase">Panel</span>
+        </button>
+        <button onclick="openAddEntryModal()" class="flex flex-col items-center text-gray-400">
+            <div class="bg-emerald-600 text-white p-2 rounded-full -mt-8 shadow-lg">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"/></svg>
+            </div>
+            <span class="text-[10px] mt-1 font-bold uppercase">Dodaj</span>
+        </button>
+        <a href="reports.html" class="py-3 flex flex-col items-center text-gray-600">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+            <span class="text-[10px] mt-1 font-bold uppercase">Raporty</span>
+        </button>
+    </nav>
+
+    <button onclick="openAddEntryModal()" class="hidden md:flex fixed bottom-8 right-8 w-16 h-16 bg-emerald-600 text-white rounded-full shadow-2xl items-center justify-center hover:scale-110 transition-transform z-50">
         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
     </button>
 
-    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40 flex justify-around py-3">
-        <button class="flex flex-col items-center text-emerald-600"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg><span class="text-[10px] font-bold">PANEL</span></button>
-        <button onclick="openAddEntryModal()" class="flex flex-col items-center text-gray-400"><div class="bg-emerald-600 text-white p-2 rounded-full -mt-8 shadow-lg"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg></div><span class="text-[10px] font-bold">DODAJ</span></button>
-        <button onclick="document.getElementById('reportsSection').scrollIntoView({behavior:'smooth'})" class="flex flex-col items-center text-gray-400"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg><span class="text-[10px] font-bold">RAPORTY</span></button>
-    </nav>
-
-    <div id="addEntryModal" class="modal"><div class="modal-content mx-4 p-6"><form id="addEntryForm" onsubmit="handleAddEntry(event)"><h3 class="text-xl font-bold mb-4">Dodaj wpis</h3><div class="mb-4"><label class="block text-sm font-bold mb-1">Kod odpadu</label><select id="wasteCode" required class="w-full p-3 border-2 rounded-xl"><option value="15 01 01">15 01 01 - Papier</option><option value="15 01 02">15 01 02 - Tworzywa</option><option value="13 02 08">13 02 08 - Oleje</option></select></div><div class="mb-4"><label class="block text-sm font-bold mb-1">Waga (kg)</label><input type="number" id="wasteWeight" step="0.1" required class="w-full p-3 border-2 rounded-xl"></div><div class="mb-6"><label class="block text-sm font-bold mb-1">Data</label><input type="date" id="entryDate" required class="w-full p-3 border-2 rounded-xl"></div><button type="submit" class="w-full bg-emerald-600 text-white font-bold py-4 rounded-xl">Zapisz</button><button type="button" onclick="closeAddEntryModal()" class="w-full text-gray-400 mt-2">Anuluj</button></form></div></div>
+    <div id="addEntryModal" class="modal">
+        <div class="modal-content mx-4 p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-slate-800">Nowy wpis ewidencji</h3>
+                <button onclick="closeAddEntryModal()" class="text-gray-400 text-2xl">&times;</button>
+            </div>
+            <form id="addEntryForm" onsubmit="handleAddEntry(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Kod odpadu</label>
+                    <select id="wasteCode" required class="w-full border-2 border-gray-100 rounded-xl p-3 outline-none focus:border-emerald-500">
+                        <option value="15 01 01">15 01 01 - Papier</option>
+                        <option value="15 01 02">15 01 02 - Tworzywa</option>
+                        <option value="13 02 08">13 02 08 - Oleje</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Masa [kg]</label>
+                    <input type="number" id="wasteWeight" required step="0.1" placeholder="np. 12.5" class="w-full border-2 border-gray-100 rounded-xl p-3 outline-none focus:border-emerald-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Data przekazania</label>
+                    <input type="date" id="entryDate" required class="w-full border-2 border-gray-100 rounded-xl p-3 outline-none focus:border-emerald-500">
+                </div>
+                <button type="submit" class="w-full bg-emerald-600 text-white font-bold py-4 rounded-xl shadow-lg mt-4">Zapisz w bazie</button>
+            </form>
+        </div>
+    </div>
 
     <script>
         const SUPABASE_URL = 'REPLACE_ME_URL';
         const SUPABASE_KEY = 'REPLACE_ME_KEY';
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        let supabaseClient = null;
+
+        // English comment: Safe initialization
+        try {
+            if (SUPABASE_URL !== 'REPLACE_ME_URL') {
+                supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            }
+        } catch (e) { console.error("Config error", e); }
+
         const WASTE_LIMITS = {'15 01 01': 500, '15 01 02': 500, '13 02 08': 100};
         let currentUser = null;
 
         document.addEventListener('DOMContentLoaded', async () => {
-            await checkAuth();
-            document.getElementById('currentYear').textContent = new Date().getFullYear();
-            document.getElementById('entryDate').valueAsDate = new Date();
-        });
-
-        async function checkAuth() {
-            const { data: { user }, error } = await supabaseClient.auth.getUser();
-            if (error || !user) { window.location.href = 'login.html'; return; }
+            if (!supabaseClient) {
+                alert("Błąd połączenia z bazą danych (Netlify keys).");
+                return;
+            }
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            if (!user) { window.location.href = 'login.html'; return; }
             currentUser = user;
             document.getElementById('userEmail').textContent = user.email;
-            await loadDashboard();
-        }
+            document.getElementById('currentYear').textContent = new Date().getFullYear();
+            document.getElementById('entryDate').valueAsDate = new Date();
+            loadDashboard();
+        });
 
         async function loadDashboard() {
-            try {
-                const { data: entries, error } = await supabaseClient.from('waste_entries').select('*').eq('user_id', currentUser.id).order('entry_date', { ascending: false });
-                if (error) throw error;
-                updateUI(entries || []);
-            } catch (error) { console.error(error); }
-        }
+            const currentYear = new Date().getFullYear();
+            const { data: entries, error } = await supabaseClient
+                .from('waste_entries')
+                .select('*')
+                .eq('user_id', currentUser.id)
+                .gte('entry_date', `${currentYear}-01-01`)
+                .lte('entry_date', `${currentYear}-12-31`)
+                .order('entry_date', { ascending: false });
 
-        function updateUI(entries) {
-            const totals = {'15 01 01': 0, '15 01 02': 0, '13 02 08': 0};
-            entries.forEach(e => { if(totals.hasOwnProperty(e.waste_code)) totals[e.waste_code] += parseFloat(e.weight_kg); });
+            if (error) { console.error(error); return; }
 
-            // Update Cards
-            Object.keys(totals).forEach((code, i) => {
-                const w = totals[code];
-                const limit = WASTE_LIMITS[code];
-                document.getElementById(`weight${i+1}`).textContent = `${w.toFixed(1)} kg`;
-                document.getElementById(`progressBar${i+1}`).style.width = `${Math.min((w/limit)*100, 100)}%`;
-            });
-
-            // Update Annual Summary Section
-            const summaryDiv = document.getElementById('annualSummary');
-            let grandTotal = 0;
-            summaryDiv.innerHTML = Object.entries(totals).map(([code, weight]) => {
-                grandTotal += weight;
-                return `<div class="flex justify-between p-3 bg-gray-50 rounded-lg"><span>${code}</span><span class="font-bold">${weight.toFixed(1)} kg</span></div>`;
-            }).join('');
-            document.getElementById('totalKgDisplay').textContent = `${grandTotal.toFixed(1)} kg`;
-
-            // Update Table
-            document.getElementById('entriesTableBody').innerHTML = entries.slice(0, 5).map(e => `
-                <tr class="border-b">
-                    <td class="py-3">${new Date(e.entry_date).toLocaleDateString()}</td>
-                    <td>${e.waste_code}</td>
-                    <td class="text-right font-bold">${e.weight_kg} kg</td>
-                </tr>`).join('');
-
+            renderUI(entries || []);
             document.getElementById('loadingState').classList.add('hidden');
             document.getElementById('dashboardContent').classList.remove('hidden');
         }
 
-        async function handleAddEntry(event) {
-            event.preventDefault();
+        function renderUI(entries) {
+            const totals = {'15 01 01': 0, '15 01 02': 0, '13 02 08': 0};
+            let grandTotal = 0;
+
+            entries.forEach(e => {
+                const w = parseFloat(e.weight_kg);
+                if (totals[e.waste_code] !== undefined) totals[e.waste_code] += w;
+                grandTotal += w;
+            });
+
+            // Render Annual Summary
+            document.getElementById('reportsSummary').innerHTML = Object.entries(totals).map(([code, weight]) => `
+                <div class="flex justify-between items-center p-4 bg-gray-50 rounded-xl border border-gray-100">
+                    <span class="font-bold text-slate-700">${code}</span>
+                    <span class="font-bold text-emerald-600">${weight.toFixed(1)} kg</span>
+                </div>
+            `).join('');
+
+            document.getElementById('totalWeight').textContent = `${grandTotal.toFixed(1)} kg`;
+            document.getElementById('totalWeightMg').textContent = `${(grandTotal / 1000).toFixed(3)} Mg`;
+
+            // Update Progress Bars
+            Object.keys(totals).forEach((code, i) => {
+                const w = totals[code];
+                const limit = WASTE_LIMITS[code];
+                const perc = Math.min((w / limit) * 100, 100);
+                document.getElementById(`weight${i+1}`).textContent = `${w.toFixed(1)} kg`;
+                const bar = document.getElementById(`progressBar${i+1}`);
+                bar.style.width = `${perc}%`;
+                if(perc > 80) bar.classList.replace('bg-emerald-500', 'bg-amber-500');
+                if(perc >= 100) bar.classList.replace('bg-amber-500', 'bg-red-600');
+            });
+        }
+
+        async function handleAddEntry(e) {
+            e.preventDefault();
+            const btn = e.target.querySelector('button');
+            btn.disabled = true;
+            btn.textContent = 'Zapisywanie...';
+
             const { error } = await supabaseClient.from('waste_entries').insert([{
                 user_id: currentUser.id,
                 waste_code: document.getElementById('wasteCode').value,
                 weight_kg: parseFloat(document.getElementById('wasteWeight').value),
                 entry_date: document.getElementById('entryDate').value
             }]);
-            if (error) alert(error.message); else { closeAddEntryModal(); loadDashboard(); }
+
+            if (error) { alert(error.message); btn.disabled = false; }
+            else { closeAddEntryModal(); loadDashboard(); btn.disabled = false; btn.textContent = 'Zapisz w bazie'; }
         }
 
         function openAddEntryModal() { document.getElementById('addEntryModal').style.display = 'block'; }
         function closeAddEntryModal() { document.getElementById('addEntryModal').style.display = 'none'; }
+        function scrollToReports() { document.getElementById('reports').scrollIntoView({behavior: 'smooth'}); }
         async function handleLogout() { await supabaseClient.auth.signOut(); window.location.href = 'login.html'; }
     </script>
 </body>

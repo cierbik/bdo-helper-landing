@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Raporty - BDO Helper</title>
+    <meta name="description" content="Raporty i zestawienia odpadów - BDO Helper">
+    
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Supabase JS Client via CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- SheetJS (XLSX Export) via CDN -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    
+    <!-- Google Fonts - Consistent with landing page and dashboard -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Custom CSS variables for consistent theming */
+        :root {
+            --primary-forest: #1a5f4a;
+            --primary-emerald: #10b981;
+            --accent-blue: #0ea5e9;
+            --dark-slate: #1e293b;
+            --light-sage: #f0fdf4;
+            --warning-amber: #f59e0b;
+            --danger-red: #ef4444;
+        }
+        
+        body {
+            font-family: 'Manrope', sans-serif;
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        /* Loading spinner */
+        .spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid var(--primary-emerald);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Table styles for better mobile experience */
+        .report-table {
+            font-size: 0.875rem;
+        }
+
+        @media (max-width: 640px) {
+            .report-table {
+                font-size: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+
+    <!-- Top Navigation Bar -->
+    <nav class="bg-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-4 md:px-6 py-4 flex items-center justify-between">
+            <!-- Back to Dashboard button -->
+            <a href="dashboard.html" class="flex items-center space-x-2 text-slate-600 hover:text-emerald-600 transition-colors">
+                <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                </svg>
+                <span class="font-semibold text-sm md:text-base">Dashboard</span>
+            </a>
+            
+            <!-- Logo -->
+            <div class="flex items-center space-x-2">
+                <svg class="w-6 h-6 md:w-8 md:h-8 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                <span class="hidden md:block text-lg md:text-xl font-bold text-slate-800">BDO Helper</span>
+            </div>
+            
+            <!-- User info and logout -->
+            <button onclick="handleLogout()" class="text-sm text-gray-600 hover:text-emerald-600 font-medium">
+                Wyloguj
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 md:px-6 py-6 md:py-8 pb-24">
+        
+        <!-- Loading State -->
+        <div id="loadingState" class="flex flex-col items-center justify-center py-20">
+            <div class="spinner mb-4"></div>
+            <p class="text-gray-600">Ładowanie raportów...</p>
+        </div>
+
+        <!-- Reports Content (hidden initially) -->
+        <div id="reportsContent" class="hidden">
+            
+            <!-- Page Header -->
+            <div class="mb-6 md:mb-8">
+                <h1 class="text-2xl md:text-4xl font-bold text-slate-800 mb-2">
+                    Raporty i zestawienia
+                </h1>
+                <p class="text-gray-600 text-sm md:text-base">
+                    Szczegółowa analiza wszystkich wpisów odpadów
+                </p>
+            </div>
+
+            <!-- Filters Section -->
+            <div class="bg-white rounded-2xl shadow-lg p-4 md:p-6 border-2 border-emerald-100 mb-6 md:mb-8">
+                <h2 class="text-lg md:text-xl font-bold text-slate-800 mb-4">Filtry</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- English comment: Date range filter - From date -->
+                    <div>
+                        <label for="dateFrom" class="block text-sm font-semibold text-gray-700 mb-2">
+                            Data od
+                        </label>
+                        <input 
+                            type="date" 
+                            id="dateFrom" 
+                            class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:border-emerald-500 focus:outline-none text-sm"
+                            onchange="applyFilters()">
+                    </div>
+
+                    <!-- English comment: Date range filter - To date -->
+                    <div>
+                        <label for="dateTo" class="block text-sm font-semibold text-gray-700 mb-2">
+                            Data do
+                        </label>
+                        <input 
+                            type="date" 
+                            id="dateTo" 
+                            class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:border-emerald-500 focus:outline-none text-sm"
+                            onchange="applyFilters()">
+                    </div>
+
+                    <!-- English comment: Waste code filter -->
+                    <div>
+                        <label for="wasteCodeFilter" class="block text-sm font-semibold text-gray-700 mb-2">
+                            Kod odpadu
+                        </label>
+                        <select 
+                            id="wasteCodeFilter" 
+                            class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:border-emerald-500 focus:outline-none text-sm"
+                            onchange="applyFilters()">
+                            <option value="">Wszystkie kody</option>
+                            <!-- English comment: Options will be populated dynamically from data -->
+                        </select>
+                    </div>
+                </div>
+
+                <!-- English comment: Filter action buttons -->
+                <div class="flex flex-col sm:flex-row gap-3 mt-4">
+                    <button 
+                        onclick="resetFilters()" 
+                        class="flex-1 sm:flex-initial bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors font-semibold text-sm flex items-center justify-center space-x-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                        </svg>
+                        <span>Resetuj</span>
+                    </button>
+                    
+                    <button 
+                        onclick="exportToExcel()" 
+                        class="flex-1 sm:flex-initial bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors font-semibold text-sm flex items-center justify-center space-x-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        <span>Eksportuj do Excel</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Summary Statistics -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 md:mb-8">
+                <!-- English comment: Statistics cards showing filtered data summary -->
+                <div class="bg-white rounded-xl shadow p-4 border-2 border-gray-100">
+                    <div class="text-xs text-gray-500 mb-1">Liczba wpisów</div>
+                    <div id="statCount" class="text-2xl font-bold text-slate-800">0</div>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow p-4 border-2 border-gray-100">
+                    <div class="text-xs text-gray-500 mb-1">Suma wag [kg]</div>
+                    <div id="statTotalKg" class="text-2xl font-bold text-emerald-600">0</div>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow p-4 border-2 border-gray-100">
+                    <div class="text-xs text-gray-500 mb-1">Suma wag [Mg]</div>
+                    <div id="statTotalMg" class="text-2xl font-bold text-blue-600">0.000</div>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow p-4 border-2 border-gray-100">
+                    <div class="text-xs text-gray-500 mb-1">Różne kody</div>
+                    <div id="statUniqueCodes" class="text-2xl font-bold text-purple-600">0</div>
+                </div>
+            </div>
+
+            <!-- Reports Table -->
+            <div class="bg-white rounded-2xl shadow-lg p-4 md:p-6 border-2 border-gray-200">
+                <h2 class="text-lg md:text-xl font-bold text-slate-800 mb-4">
+                    Szczegółowe zestawienie
+                </h2>
+
+                <!-- English comment: Scrollable table container for mobile -->
+                <div class="overflow-x-auto -mx-4 md:mx-0">
+                    <div class="inline-block min-w-full align-middle">
+                        <table class="min-w-full report-table">
+                            <thead>
+                                <tr class="bg-gradient-to-r from-emerald-50 to-blue-50 border-b-2 border-emerald-200">
+                                    <th class="px-3 py-3 text-left text-xs md:text-sm font-bold text-slate-700 uppercase tracking-wider">
+                                        Data
+                                    </th>
+                                    <th class="px-3 py-3 text-left text-xs md:text-sm font-bold text-slate-700 uppercase tracking-wider">
+                                        Kod
+                                    </th>
+                                    <th class="px-3 py-3 text-left text-xs md:text-sm font-bold text-slate-700 uppercase tracking-wider hidden md:table-cell">
+                                        Nazwa odpadu
+                                    </th>
+                                    <th class="px-3 py-3 text-right text-xs md:text-sm font-bold text-slate-700 uppercase tracking-wider">
+                                        Kg
+                                    </th>
+                                    <th class="px-3 py-3 text-right text-xs md:text-sm font-bold text-slate-700 uppercase tracking-wider hidden sm:table-cell">
+                                        Mg
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody id="reportsTableBody">
+                                <!-- English comment: Table rows will be populated by JavaScript -->
+                                <tr>
+                                    <td colspan="5" class="text-center py-8 text-gray-500 text-sm">
+                                        Brak danych do wyświetlenia
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- English comment: Results count info -->
+                <div class="mt-4 text-sm text-gray-500 text-center md:text-right">
+                    Wyświetlono: <span id="displayedCount" class="font-semibold text-slate-700">0</span> wpisów
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Bottom Navigation (Mobile) -->
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40">
+        <div class="grid grid-cols-3 gap-0">
+            <a href="dashboard.html" class="py-3 flex flex-col items-center text-gray-600">
+                <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                </svg>
+                <span class="text-xs font-medium">Panel</span>
+            </a>
+            <a href="dashboard.html" class="py-3 flex flex-col items-center text-gray-600">
+                <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+                <span class="text-xs font-medium">Dodaj</span>
+            </a>
+            <!-- English comment: Active state for Reports tab -->
+            <button class="py-3 flex flex-col items-center text-emerald-600">
+                <svg class="w-6 h-6 mb-1" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                </svg>
+                <span class="text-xs font-bold">Raporty</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- JavaScript -->
+    <script>
+        // English comment: Supabase configuration - will be replaced by sed in Netlify
+        const SUPABASE_URL = 'REPLACE_ME_URL';
+        const SUPABASE_KEY = 'REPLACE_ME_KEY';
+        
+        // English comment: Validate configuration and initialize Supabase client
+        let supabaseClient = null;
+        
+        try {
+            if (SUPABASE_URL === 'REPLACE_ME_URL' || SUPABASE_KEY === 'REPLACE_ME_KEY') {
+                console.error('⚠️ Supabase credentials not configured!');
+                alert('Błąd konfiguracji: Aplikacja wymaga konfiguracji Supabase.');
+            } else {
+                supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+                console.log('✅ Supabase client initialized');
+            }
+        } catch (error) {
+            console.error('❌ Failed to initialize Supabase:', error);
+        }
+
+        // English comment: Waste code descriptions mapping
+        const WASTE_CODE_NAMES = {
+            '15 01 01': 'Opakowania z papieru i tektury',
+            '15 01 02': 'Opakowania z tworzyw sztucznych',
+            '13 02 08': 'Inne oleje silnikowe, przekładniowe i smarowe',
+            '17 01 01': 'Odpady betonu oraz gruz betonowy z rozbiórek i remontów',
+            '17 01 07': 'Zmieszane odpady z betonu, gruzu ceglanego, odpadowych materiałów ceramicznych i elementów wyposażenia',
+            '15 01 04': 'Opakowania metalowe',
+            '15 01 05': 'Opakowania kompozytowe',
+            '15 01 06': 'Zmieszane odpady opakowaniowe',
+            '16 01 03': 'Zużyte opony',
+            '20 01 01': 'Papier i tektura',
+        };
+
+        // English comment: Global variables to store data
+        let currentUser = null;
+        let allEntriesData = [];
+        let filteredEntriesData = [];
+
+        // English comment: Initialize app on page load
+        document.addEventListener('DOMContentLoaded', async () => {
+            await checkAuth();
+        });
+
+        // English comment: Check if user is authenticated
+        async function checkAuth() {
+            if (!supabaseClient) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const { data: { user }, error } = await supabaseClient.auth.getUser();
+            
+            if (error || !user) {
+                // English comment: Redirect to login page if not authenticated
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            currentUser = user;
+            
+            // English comment: Load reports data
+            await loadReportsData();
+        }
+
+        // English comment: Load all waste entries for current user
+        async function loadReportsData() {
+            try {
+                // English comment: Show loading state
+                document.getElementById('loadingState').classList.remove('hidden');
+                document.getElementById('reportsContent').classList.add('hidden');
+                
+                // English comment: Fetch ALL waste entries from Supabase for current user
+                // IMPORTANT: Filter by user_id to ensure users only see their own data
+                const { data: entries, error } = await supabaseClient
+                    .from('waste_entries')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .order('entry_date', { ascending: false });
+                
+                if (error) {
+                    console.error('Error fetching entries:', error);
+                    alert('Błąd pobierania danych: ' + error.message);
+                    return;
+                }
+                
+                // English comment: Store entries globally
+                allEntriesData = entries || [];
+                filteredEntriesData = [...allEntriesData];
+                
+                // English comment: Populate waste code filter dropdown
+                populateWasteCodeFilter();
+                
+                // English comment: Set default date range (current year)
+                setDefaultDateRange();
+                
+                // English comment: Display data
+                displayReportsTable();
+                updateStatistics();
+                
+                // English comment: Hide loading, show content
+                document.getElementById('loadingState').classList.add('hidden');
+                document.getElementById('reportsContent').classList.remove('hidden');
+                
+            } catch (error) {
+                console.error('Reports error:', error);
+                alert('Wystąpił błąd podczas ładowania raportów');
+            }
+        }
+
+        // English comment: Populate waste code filter with unique codes from data
+        function populateWasteCodeFilter() {
+            const select = document.getElementById('wasteCodeFilter');
+            const uniqueCodes = [...new Set(allEntriesData.map(entry => entry.waste_code))].sort();
+            
+            // English comment: Clear existing options except "All"
+            select.innerHTML = '<option value="">Wszystkie kody</option>';
+            
+            // English comment: Add option for each unique waste code
+            uniqueCodes.forEach(code => {
+                const option = document.createElement('option');
+                option.value = code;
+                option.textContent = code;
+                select.appendChild(option);
+            });
+        }
+
+        // English comment: Set default date range to current year
+        function setDefaultDateRange() {
+            const currentYear = new Date().getFullYear();
+            const yearStart = `${currentYear}-01-01`;
+            const yearEnd = `${currentYear}-12-31`;
+            
+            document.getElementById('dateFrom').value = yearStart;
+            document.getElementById('dateTo').value = yearEnd;
+        }
+
+        // English comment: Apply filters to data
+        function applyFilters() {
+            const dateFrom = document.getElementById('dateFrom').value;
+            const dateTo = document.getElementById('dateTo').value;
+            const selectedCode = document.getElementById('wasteCodeFilter').value;
+            
+            // English comment: Start with all data
+            filteredEntriesData = [...allEntriesData];
+            
+            // English comment: Apply date range filter
+            if (dateFrom) {
+                filteredEntriesData = filteredEntriesData.filter(entry => 
+                    entry.entry_date >= dateFrom
+                );
+            }
+            
+            if (dateTo) {
+                filteredEntriesData = filteredEntriesData.filter(entry => 
+                    entry.entry_date <= dateTo
+                );
+            }
+            
+            // English comment: Apply waste code filter
+            if (selectedCode) {
+                filteredEntriesData = filteredEntriesData.filter(entry => 
+                    entry.waste_code === selectedCode
+                );
+            }
+            
+            // English comment: Update display
+            displayReportsTable();
+            updateStatistics();
+        }
+
+        // English comment: Reset all filters to defaults
+        function resetFilters() {
+            setDefaultDateRange();
+            document.getElementById('wasteCodeFilter').value = '';
+            applyFilters();
+        }
+
+        // English comment: Display filtered data in table
+        function displayReportsTable() {
+            const tableBody = document.getElementById('reportsTableBody');
+            
+            if (filteredEntriesData.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="text-center py-8 text-gray-500 text-sm">
+                            Brak danych spełniających kryteria filtrów
+                        </td>
+                    </tr>
+                `;
+                document.getElementById('displayedCount').textContent = '0';
+                return;
+            }
+            
+            // English comment: Generate table rows
+            tableBody.innerHTML = filteredEntriesData.map(entry => {
+                const date = new Date(entry.entry_date).toLocaleDateString('pl-PL');
+                const weightKg = parseFloat(entry.weight_kg || 0);
+                const weightMg = (weightKg / 1000).toFixed(3);
+                const wasteName = WASTE_CODE_NAMES[entry.waste_code] || 'Nieznany kod odpadu';
+                
+                return `
+                    <tr class="border-b border-gray-100 hover:bg-emerald-50 transition-colors">
+                        <td class="px-3 py-3 text-sm text-gray-700 whitespace-nowrap">
+                            ${date}
+                        </td>
+                        <td class="px-3 py-3 text-sm font-medium text-slate-800 whitespace-nowrap">
+                            ${entry.waste_code}
+                        </td>
+                        <td class="px-3 py-3 text-sm text-gray-600 hidden md:table-cell">
+                            ${wasteName}
+                        </td>
+                        <td class="px-3 py-3 text-sm font-semibold text-right text-emerald-700 whitespace-nowrap">
+                            ${weightKg.toFixed(1)}
+                        </td>
+                        <td class="px-3 py-3 text-sm font-semibold text-right text-blue-700 whitespace-nowrap hidden sm:table-cell">
+                            ${weightMg}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+            
+            // English comment: Update displayed count
+            document.getElementById('displayedCount').textContent = filteredEntriesData.length;
+        }
+
+        // English comment: Update statistics cards based on filtered data
+        function updateStatistics() {
+            const count = filteredEntriesData.length;
+            const totalKg = filteredEntriesData.reduce((sum, entry) => 
+                sum + parseFloat(entry.weight_kg || 0), 0
+            );
+            const totalMg = (totalKg / 1000).toFixed(3);
+            const uniqueCodes = new Set(filteredEntriesData.map(entry => entry.waste_code)).size;
+            
+            document.getElementById('statCount').textContent = count;
+            document.getElementById('statTotalKg').textContent = totalKg.toFixed(1);
+            document.getElementById('statTotalMg').textContent = totalMg;
+            document.getElementById('statUniqueCodes').textContent = uniqueCodes;
+        }
+
+        // English comment: Export filtered data to Excel (XLSX) using SheetJS
+        function exportToExcel() {
+            if (filteredEntriesData.length === 0) {
+                alert('Brak danych do eksportu. Dostosuj filtry.');
+                return;
+            }
+            
+            // English comment: Prepare data for export
+            const exportData = filteredEntriesData.map(entry => {
+                const weightKg = parseFloat(entry.weight_kg || 0);
+                const weightMg = (weightKg / 1000).toFixed(3);
+                const wasteName = WASTE_CODE_NAMES[entry.waste_code] || 'Nieznany kod odpadu';
+                
+                return {
+                    'Data': new Date(entry.entry_date).toLocaleDateString('pl-PL'),
+                    'Kod odpadu': entry.waste_code,
+                    'Nazwa odpadu': wasteName,
+                    'Masa [kg]': weightKg.toFixed(1),
+                    'Masa [Mg]': weightMg
+                };
+            });
+            
+            // English comment: Create worksheet from data
+            const worksheet = XLSX.utils.json_to_sheet(exportData);
+            
+            // English comment: Set column widths for better readability
+            worksheet['!cols'] = [
+                { wch: 12 },  // Data
+                { wch: 15 },  // Kod odpadu
+                { wch: 50 },  // Nazwa odpadu
+                { wch: 12 },  // Masa [kg]
+                { wch: 12 }   // Masa [Mg]
+            ];
+            
+            // English comment: Create workbook and add worksheet
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'Raporty BDO');
+            
+            // English comment: Generate filename with current date
+            const today = new Date().toISOString().split('T')[0];
+            const filename = `raport_BDO_${today}.xlsx`;
+            
+            // English comment: Trigger download
+            XLSX.writeFile(workbook, filename);
+            
+            console.log(`✅ Exported ${filteredEntriesData.length} entries to ${filename}`);
+        }
+
+        // English comment: Handle user logout
+        async function handleLogout() {
+            if (!supabaseClient) {
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            const { error } = await supabaseClient.auth.signOut();
+            
+            if (error) {
+                console.error('Logout error:', error);
+                alert('Błąd wylogowania');
+                return;
+            }
+            
+            // English comment: Redirect to login page
+            window.location.href = 'login.html';
+        }
+    </script>
+
+</body>
+</html>

@@ -18,13 +18,21 @@
 
     <nav class="bg-white shadow-sm sticky top-0 z-50 px-4">
         <div class="container mx-auto py-4 flex items-center justify-between">
-            <div class="flex items-center space-x-2">
-                <svg class="w-7 h-7 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                <span class="text-xl font-bold text-slate-800">BDO Helper</span>
+            <div class="flex items-center space-x-8">
+                <div class="flex items-center space-x-2">
+                    <svg class="w-7 h-7 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    <span class="text-xl font-bold text-slate-800">BDO Helper</span>
+                </div>
+                
+                <div class="hidden md:flex items-center space-x-6">
+                    <a href="dashboard.html" class="text-emerald-600 font-bold border-b-2 border-emerald-600 pb-1">Dashboard</a>
+                    <a href="reports.html" class="text-slate-500 hover:text-emerald-600 font-medium transition-colors">Raporty</a>
+                </div>
             </div>
+
             <div class="flex items-center space-x-4">
-                <span id="userEmail" class="hidden md:block text-sm text-gray-500"></span>
-                <button onclick="handleLogout()" class="text-sm font-semibold text-emerald-600">Wyloguj</button>
+                <span id="userEmail" class="hidden md:block text-sm text-gray-500 font-medium border-r pr-4 border-gray-200"></span>
+                <button onclick="handleLogout()" class="text-sm font-semibold text-emerald-600 hover:text-emerald-700">Wyloguj</button>
             </div>
         </div>
     </nav>
@@ -208,6 +216,15 @@
         
         document.getElementById('loadingState').classList.add('hidden');
         document.getElementById('dashboardContent').classList.remove('hidden');
+    }
+    async function handleLogout() {
+    if (!window.supabaseClient) return;
+    const { error } = await window.supabaseClient.auth.signOut();
+    window.location.href = 'login.html';
+    }
+
+    function closeAddEntryModal() {
+        document.getElementById('addEntryModal').style.display = 'none';
     }
     function renderUI(entries) {
         console.log("🎨 Rendering UI with entries:", entries);

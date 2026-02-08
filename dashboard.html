@@ -148,7 +148,12 @@
     // English comment: Ensure variables are global
     window.SUPABASE_URL = 'REPLACE_ME_URL';
     window.SUPABASE_KEY = 'REPLACE_ME_KEY';
-
+    
+    const WASTE_LIMITS = {
+        '15 01 01': 500,
+        '15 01 02': 500,
+        '13 02 08': 100
+    };
     async function initDashboard() {
         console.log("🚀 Dashboard: Starting initialization...");
 

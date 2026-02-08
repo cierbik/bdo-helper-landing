@@ -187,24 +187,35 @@
 </head>
 <body class="bg-gray-50 text-gray-900">
 
-    <!-- Sticky Navigation Header -->
+<!-- Sticky Navigation Header -->
 <header class="fixed top-0 left-0 right-0 z-50 bg-white shadow-md transition-all duration-300">
-    <nav class="container mx-auto px-4 py-4 flex items-center justify-between">
+    <nav class="container mx-auto px-4 md:px-6 py-4 flex items-center justify-between">
         <!-- Logo -->
         <div class="flex items-center space-x-2">
             <svg class="w-8 h-8 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
             </svg>
-            <span class="text-2xl font-bold text-slate-800">BDO Helper</span>
+            <span class="text-xl md:text-2xl font-bold text-slate-800">BDO Helper</span>
         </div>
         
         <!-- Navigation buttons -->
-        <div class="flex items-center space-x-4">
-            <a href="login.html" class="hidden md:block text-slate-600 hover:text-emerald-600 font-medium transition-colors">
-                Zaloguj się
+        <div class="flex items-center space-x-2 md:space-x-4">
+            <!-- Login link - icon on mobile, text on desktop -->
+            <a href="login.html" class="group text-slate-600 hover:text-emerald-600 transition-all duration-200 flex items-center space-x-2" title="Zaloguj się">
+                <span class="p-1.5 rounded-lg group-hover:bg-emerald-50 transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 22 22">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </span>
+                
+                <span class="hidden md:block font-semibold text-sm">
+                    Zaloguj się
+                </span>
             </a>
-            <a href="#pricing" class="btn-primary text-white px-6 py-3 rounded-full font-semibold hover:shadow-lg">
-                Zacznij teraz
+            
+            <!-- Primary CTA - always visible -->
+            <a href="register.html" class="btn-primary text-white px-4 py-2 md:px-6 md:py-3 rounded-full font-semibold hover:shadow-lg text-sm md:text-base">
+                Rejestracja
             </a>
         </div>
     </nav>

@@ -100,57 +100,56 @@
 
     <script>
         // English comment: Supabase configuration
+        // English comment: Initialize Supabase client
         const SUPABASE_URL = 'REPLACE_ME_URL';
         const SUPABASE_KEY = 'REPLACE_ME_KEY';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        document.addEventListener('DOMContentLoaded', async () => {
-            if (!supabaseClient) return; // English comment: Stop if no client
-            
-            const { data: { user } } = await supabaseClient.auth.getUser();
-            if (user) {
-                window.location.href = 'dashboard.html';
-            }
-        });
-
         async function handleLogin(event) {
-            event.preventDefault();
-            const email = document.getElementById('email').value;
+            event.preventDefault(); 
+            
+            // English comment: Debug start
+            console.log("LOGIN_DEBUG: Form submitted");
+
+            const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
             const errorMessage = document.getElementById('errorMessage');
-            const btn = event.target.querySelector('button');
+            const submitBtn = event.target.querySelector('button');
 
             errorMessage.classList.add('hidden');
-
-            if (!supabaseClient) {
-                errorMessage.textContent = 'Błąd: Połączenie z bazą nie zostało skonfigurowane.';
-                errorMessage.classList.remove('hidden');
-                return;
-            }
+            submitBtn.disabled = true;
+            submitBtn.innerText = 'Autoryzacja...';
 
             try {
-                btn.disabled = true;
-                btn.textContent = 'Logowanie...';
-
                 const { data, error } = await supabaseClient.auth.signInWithPassword({
                     email: email,
                     password: password
                 });
 
                 if (error) {
-                    errorMessage.textContent = 'Błąd: ' + (error.message === 'Invalid login credentials' ? 'Błędny email lub hasło' : error.message);
+                    console.error("LOGIN_DEBUG: Supabase error:", error.message);
+                    errorMessage.textContent = 'Błąd: ' + (error.message === 'Invalid login credentials' ? 'Błędny mail lub hasło' : error.message);
                     errorMessage.classList.remove('hidden');
-                    btn.disabled = false;
-                    btn.textContent = 'Zaloguj się';
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = 'Zaloguj się';
                     return;
                 }
 
-                window.location.href = 'dashboard.html';
-            } catch (error) {
-                errorMessage.textContent = 'Wystąpił nieoczekiwany błąd serwera.';
+                if (data.user) {
+                    console.log("LOGIN_DEBUG: Success! User found:", data.user.email);
+                    // English comment: Ensure session is saved before redirect
+                    const { data: sessionData } = await supabaseClient.auth.getSession();
+                    console.log("LOGIN_DEBUG: Session established:", !!sessionData.session);
+                    
+                    // English comment: Final redirect
+                    window.location.href = 'dashboard.html';
+                }
+            } catch (err) {
+                console.error("LOGIN_DEBUG: Unexpected fatal error:", err);
+                errorMessage.textContent = 'Wystąpił krytyczny błąd połączenia.';
                 errorMessage.classList.remove('hidden');
-                btn.disabled = false;
-                btn.textContent = 'Zaloguj się';
+                submitBtn.disabled = false;
+                submitBtn.innerText = 'Zaloguj się';
             }
         }
     </script>

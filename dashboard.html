@@ -447,403 +447,198 @@
 
     <!-- JavaScript -->
     <script>
-        // English comment: Supabase configuration - replace with your actual credentials
-        const SUPABASE_URL = 'REPLACE_ME_URL';
-        const SUPABASE_KEY = 'REPLACE_ME_KEY';
-        
-        // English comment: Validate configuration and initialize Supabase client
-        let supabaseClient = null;
-        
-        try {
-            if (SUPABASE_URL === 'REPLACE_ME_URL' || SUPABASE_KEY === 'REPLACE_ME_KEY') {
-                console.error('⚠️ Supabase credentials not configured!');
-                alert('Błąd konfiguracji: Aplikacja wymaga konfiguracji Supabase. Sprawdź SUPABASE_SETUP.md');
-            } else {
-                supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-                console.log('✅ Supabase client initialized');
-            }
-        } catch (error) {
-            console.error('❌ Failed to initialize Supabase:', error);
+    // English comment: Supabase configuration - values injected via Netlify
+    const SUPABASE_URL = 'REPLACE_ME_URL';
+    const SUPABASE_KEY = 'REPLACE_ME_KEY';
+    
+    // English comment: Initialize client with fallback protection
+    let supabaseClient = null;
+    try {
+        if (SUPABASE_URL !== 'REPLACE_ME_URL' && SUPABASE_KEY !== 'REPLACE_ME_KEY') {
+            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            console.log('✅ Dashboard: Supabase initialized');
+        } else {
+            console.error('⚠️ Dashboard: Credentials missing!');
+        }
+    } catch (error) {
+        console.error('❌ Dashboard: Init failed:', error);
+    }
+
+    const WASTE_LIMITS = {
+        '15 01 01': 500,
+        '15 01 02': 500,
+        '13 02 08': 100
+    };
+
+    let currentUser = null;
+    let allEntriesData = [];
+
+    // English comment: Secure entry point
+    document.addEventListener('DOMContentLoaded', async () => {
+        // If sed failed, show alert and stop
+        if (!supabaseClient) {
+            alert('Błąd konfiguracji panelu. Spróbuj odświeżyć stronę (Ctrl+F5).');
+            return;
         }
 
-        // English comment: Waste code limits configuration (in kg)
-        const WASTE_LIMITS = {
-            '15 01 01': 500,  // Paper packaging: 0.5 Mg
-            '15 01 02': 500,  // Plastic packaging: 0.5 Mg
-            '13 02 08': 100   // Engine oils: test threshold
-        };
+        await checkAuth();
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+        document.getElementById('entryDate').valueAsDate = new Date();
+    });
 
-        // English comment: Global variable to store current user
-        let currentUser = null;
-        let allEntriesData = []; // English comment: Store all entries for report generation
-
-        // English comment: Initialize app on page load
-        document.addEventListener('DOMContentLoaded', async () => {
-            await checkAuth();
-            
-            // English comment: Set current year display
-            document.getElementById('currentYear').textContent = new Date().getFullYear();
-            
-            // English comment: Set today's date as default in the form
-            document.getElementById('entryDate').valueAsDate = new Date();
-        });
-
-        // English comment: Check if user is authenticated
-        async function checkAuth() {
-            if (!supabaseClient) {
-                window.location.href = 'login.html';
-                return;
-            }
-
+    async function checkAuth() {
+        try {
             const { data: { user }, error } = await supabaseClient.auth.getUser();
             
             if (error || !user) {
-                // English comment: Redirect to login page if not authenticated
+                console.warn("No active session, redirecting to login...");
                 window.location.href = 'login.html';
                 return;
             }
             
             currentUser = user;
             document.getElementById('userEmail').textContent = user.email;
-            
-            // English comment: Load dashboard data
             await loadDashboard();
-        }
-
-        // English comment: Load dashboard data and calculate limits
-        async function loadDashboard() {
-            try {
-                // English comment: Show loading state
-                document.getElementById('loadingState').classList.remove('hidden');
-                document.getElementById('dashboardContent').classList.add('hidden');
-                
-                // English comment: Get current year for filtering
-                const currentYear = new Date().getFullYear();
-                const yearStart = `${currentYear}-01-01`;
-                const yearEnd = `${currentYear}-12-31`;
-                
-                // English comment: Fetch waste entries from Supabase for current year
-                // IMPORTANT: Filter by user_id to ensure users only see their own data
-                const { data: entries, error } = await supabaseClient
-                    .from('waste_entries')
-                    .select('*')
-                    .eq('user_id', currentUser.id)
-                    .gte('entry_date', yearStart)
-                    .lte('entry_date', yearEnd)
-                    .order('entry_date', { ascending: false });
-                
-                if (error) {
-                    console.error('Error fetching entries:', error);
-                    alert('Błąd pobierania danych: ' + error.message);
-                    return;
-                }
-                
-                // English comment: Store entries globally for other functions
-                allEntriesData = entries || [];
-                
-                // English comment: Generate annual report summary
-                generateAnnualReport(allEntriesData);
-                
-                // English comment: Calculate totals per waste code for limit cards
-                calculateLimits(allEntriesData);
-                
-                // English comment: Display recent entries in table
-                displayRecentEntries(allEntriesData);
-                
-                // English comment: Hide loading, show dashboard
-                document.getElementById('loadingState').classList.add('hidden');
-                document.getElementById('dashboardContent').classList.remove('hidden');
-                
-            } catch (error) {
-                console.error('Dashboard error:', error);
-                alert('Wystąpił błąd podczas ładowania panelu');
-            }
-        }
-
-        // English comment: Generate annual report summary grouped by waste code
-        function generateAnnualReport(entries) {
-            const reportContainer = document.getElementById('reportsSummary');
-            
-            if (!entries || entries.length === 0) {
-                reportContainer.innerHTML = `
-                    <div class="text-center py-8 text-gray-500">
-                        <p class="mb-2">Brak wpisów za bieżący rok</p>
-                        <p class="text-sm">Dodaj pierwszy wpis, aby zobaczyć raport</p>
-                    </div>
-                `;
-                document.getElementById('totalWeight').textContent = '0 kg';
-                document.getElementById('totalWeightMg').textContent = '0.000 Mg';
-                return;
-            }
-            
-            // English comment: Group entries by waste code and sum weights
-            const summary = {};
-            let grandTotal = 0;
-            
-            entries.forEach(entry => {
-                const code = entry.waste_code;
-                const weight = parseFloat(entry.weight_kg || 0);
-                
-                if (!summary[code]) {
-                    summary[code] = {
-                        code: code,
-                        totalKg: 0,
-                        count: 0
-                    };
-                }
-                
-                summary[code].totalKg += weight;
-                summary[code].count += 1;
-                grandTotal += weight;
-            });
-            
-            // English comment: Sort by total weight (descending)
-            const sortedCodes = Object.keys(summary).sort((a, b) => 
-                summary[b].totalKg - summary[a].totalKg
-            );
-            
-            // English comment: Generate HTML for each waste code
-            reportContainer.innerHTML = sortedCodes.map(code => {
-                const data = summary[code];
-                const weightMg = (data.totalKg / 1000).toFixed(3);
-                
-                return `
-                    <div class="bg-gradient-to-r from-slate-50 to-gray-50 rounded-xl p-4 border border-gray-200 hover:shadow-md transition-shadow">
-                        <div class="flex items-center justify-between">
-                            <div class="flex-1">
-                                <div class="font-bold text-slate-800 mb-1">${code}</div>
-                                <div class="text-xs text-gray-500">${data.count} ${data.count === 1 ? 'wpis' : 'wpisów'}</div>
-                            </div>
-                            <div class="text-right">
-                                <div class="text-xl md:text-2xl font-bold text-emerald-700">${data.totalKg.toFixed(1)} kg</div>
-                                <div class="text-xs text-gray-500">${weightMg} Mg</div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-            
-            // English comment: Update total weight display
-            const totalMg = (grandTotal / 1000).toFixed(3);
-            document.getElementById('totalWeight').textContent = `${grandTotal.toFixed(1)} kg`;
-            document.getElementById('totalWeightMg').textContent = `${totalMg} Mg`;
-        }
-
-        // English comment: Calculate weight totals and update limit cards
-        function calculateLimits(entries) {
-            // English comment: Initialize totals object
-            const totals = {
-                '15 01 01': 0,
-                '15 01 02': 0,
-                '13 02 08': 0
-            };
-            
-            // English comment: Sum up weights per waste code
-            entries.forEach(entry => {
-                if (totals.hasOwnProperty(entry.waste_code)) {
-                    totals[entry.waste_code] += parseFloat(entry.weight_kg || 0);
-                }
-            });
-            
-            // English comment: Update each limit card
-            Object.keys(totals).forEach((code, index) => {
-                const cardNumber = index + 1;
-                const totalWeight = totals[code];
-                const limit = WASTE_LIMITS[code];
-                const percentage = (totalWeight / limit) * 100;
-                
-                // English comment: Update weight display
-                document.getElementById(`weight${cardNumber}`).textContent = `${totalWeight.toFixed(1)} kg`;
-                
-                // English comment: Update progress bar
-                const progressBar = document.getElementById(`progressBar${cardNumber}`);
-                progressBar.style.width = `${Math.min(percentage, 100)}%`;
-                
-                // English comment: Update status message and colors based on percentage
-                const statusMessage = document.getElementById(`statusMessage${cardNumber}`);
-                const limitCard = document.getElementById(`limitCard${cardNumber}`);
-                
-                if (percentage >= 100) {
-                    // English comment: Over limit - RED alert
-                    progressBar.className = 'progress-bar bg-red-600 h-2 md:h-3 rounded-full';
-                    limitCard.className = 'bg-white rounded-2xl shadow-lg p-4 md:p-6 border-2 border-red-400';
-                    statusMessage.innerHTML = `
-                        <svg class="w-3 h-3 md:w-4 md:h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
-                        </svg>
-                        <span>Przekroczono limit!</span>
-                    `;
-                    statusMessage.className = 'flex items-center text-xs text-red-600 font-semibold';
-                } else if (percentage >= 80) {
-                    // English comment: 80-99% - YELLOW/AMBER warning
-                    progressBar.className = 'progress-bar bg-amber-500 h-2 md:h-3 rounded-full';
-                    limitCard.className = 'bg-white rounded-2xl shadow-lg p-4 md:p-6 border-2 border-amber-400';
-                    statusMessage.innerHTML = `
-                        <svg class="w-3 h-3 md:w-4 md:h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
-                        </svg>
-                        <span>Uwaga - zbliżasz się do limitu!</span>
-                    `;
-                    statusMessage.className = 'flex items-center text-xs text-amber-600 font-semibold';
-                } else {
-                    // English comment: Under 80% - GREEN safe zone
-                    progressBar.className = 'progress-bar bg-emerald-500 h-2 md:h-3 rounded-full';
-                    limitCard.className = 'bg-white rounded-2xl shadow-lg p-4 md:p-6 border-2 border-gray-200';
-                    statusMessage.innerHTML = `
-                        <svg class="w-3 h-3 md:w-4 md:h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                        </svg>
-                        <span>Bezpieczna strefa</span>
-                    `;
-                    statusMessage.className = 'flex items-center text-xs text-emerald-600';
-                }
-            });
-        }
-
-        // English comment: Display recent 5 entries in the table
-        function displayRecentEntries(entries) {
-            const tableBody = document.getElementById('entriesTableBody');
-            
-            if (!entries || entries.length === 0) {
-                tableBody.innerHTML = `
-                    <tr>
-                        <td colspan="3" class="text-center py-8 text-gray-500 text-sm">
-                            Brak wpisów. Dodaj pierwszy wpis!
-                        </td>
-                    </tr>
-                `;
-                return;
-            }
-            
-            // English comment: Take only first 5 entries (already sorted by date desc)
-            const recentEntries = entries.slice(0, 5);
-            
-            tableBody.innerHTML = recentEntries.map(entry => {
-                const date = new Date(entry.entry_date).toLocaleDateString('pl-PL');
-                return `
-                    <tr class="border-b border-gray-100 hover:bg-gray-50">
-                        <td class="py-3 px-2 text-xs md:text-sm text-gray-700">${date}</td>
-                        <td class="py-3 px-2 text-xs md:text-sm font-medium text-slate-800">${entry.waste_code}</td>
-                        <td class="py-3 px-2 text-xs md:text-sm text-right font-semibold text-emerald-700">${entry.weight_kg} kg</td>
-                    </tr>
-                `;
-            }).join('');
-        }
-
-        // English comment: Export report to Excel (simple CSV export)
-        function exportToExcel() {
-            if (allEntriesData.length === 0) {
-                alert('Brak danych do eksportu');
-                return;
-            }
-            
-            // English comment: Create CSV content
-            let csvContent = "data:text/csv;charset=utf-8,";
-            csvContent += "Data,Kod odpadu,Waga [kg]\n";
-            
-            allEntriesData.forEach(entry => {
-                const date = new Date(entry.entry_date).toLocaleDateString('pl-PL');
-                csvContent += `${date},${entry.waste_code},${entry.weight_kg}\n`;
-            });
-            
-            // English comment: Trigger download
-            const encodedUri = encodeURI(csvContent);
-            const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", `raport_BDO_${new Date().getFullYear()}.csv`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-
-        // English comment: Scroll to reports section (mobile navigation)
-        function scrollToReports() {
-            document.getElementById('reports').scrollIntoView({ behavior: 'smooth' });
-        }
-
-        // English comment: Modal functions
-        function openAddEntryModal() {
-            document.getElementById('addEntryModal').style.display = 'block';
-            document.body.style.overflow = 'hidden';
-        }
-        
-        function closeAddEntryModal() {
-            document.getElementById('addEntryModal').style.display = 'none';
-            document.body.style.overflow = 'auto';
-            document.getElementById('addEntryForm').reset();
-            document.getElementById('entryDate').valueAsDate = new Date();
-        }
-        
-        // English comment: Close modal when clicking outside
-        window.onclick = function(event) {
-            const modal = document.getElementById('addEntryModal');
-            if (event.target === modal) {
-                closeAddEntryModal();
-            }
-        }
-
-        // English comment: Handle adding new waste entry
-        async function handleAddEntry(event) {
-            event.preventDefault();
-            
-            if (!supabaseClient) {
-                alert('Błąd: Brak połączenia z bazą danych');
-                return;
-            }
-            
-            const wasteCode = document.getElementById('wasteCode').value;
-            const weight = parseFloat(document.getElementById('wasteWeight').value);
-            const entryDate = document.getElementById('entryDate').value;
-            
-            try {
-                // English comment: Insert new entry into Supabase
-                // IMPORTANT: user_id is automatically set to current user
-                const { data, error } = await supabaseClient
-                    .from('waste_entries')
-                    .insert([
-                        {
-                            user_id: currentUser.id,
-                            waste_code: wasteCode,
-                            weight_kg: weight,
-                            entry_date: entryDate
-                        }
-                    ]);
-                
-                if (error) {
-                    console.error('Insert error:', error);
-                    alert('Błąd dodawania wpisu: ' + error.message);
-                    return;
-                }
-                
-                // English comment: Success - close modal and reload dashboard
-                closeAddEntryModal();
-                await loadDashboard();
-                
-            } catch (error) {
-                console.error('Error adding entry:', error);
-                alert('Wystąpił błąd podczas dodawania wpisu');
-            }
-        }
-
-        // English comment: Handle user logout
-        async function handleLogout() {
-            if (!supabaseClient) {
-                window.location.href = 'login.html';
-                return;
-            }
-            
-            const { error } = await supabaseClient.auth.signOut();
-            
-            if (error) {
-                console.error('Logout error:', error);
-                alert('Błąd wylogowania');
-                return;
-            }
-            
-            // English comment: Redirect to login page
+        } catch (e) {
             window.location.href = 'login.html';
         }
-    </script>
+    }
+
+    async function loadDashboard() {
+        try {
+            document.getElementById('loadingState').classList.remove('hidden');
+            document.getElementById('dashboardContent').classList.add('hidden');
+            
+            const currentYear = new Date().getFullYear();
+            const yearStart = `${currentYear}-01-01`;
+            const yearEnd = `${currentYear}-12-31`;
+            
+            // English comment: Fetch entries only for the logged-in user
+            const { data: entries, error } = await supabaseClient
+                .from('waste_entries')
+                .select('*')
+                .eq('user_id', currentUser.id)
+                .gte('entry_date', yearStart)
+                .lte('entry_date', yearEnd)
+                .order('entry_date', { ascending: false });
+            
+            if (error) throw error;
+            
+            allEntriesData = entries || [];
+            generateAnnualReport(allEntriesData);
+            calculateLimits(allEntriesData);
+            displayRecentEntries(allEntriesData);
+            
+            document.getElementById('loadingState').classList.add('hidden');
+            document.getElementById('dashboardContent').classList.remove('hidden');
+            
+        } catch (error) {
+            console.error('Dashboard error:', error);
+            alert('Błąd pobierania danych. Upewnij się, że tabela waste_entries istnieje w Supabase.');
+        }
+    }
+
+    // --- UI HELPER FUNCTIONS ---
+
+    function generateAnnualReport(entries) {
+        const reportContainer = document.getElementById('reportsSummary');
+        if (!entries || entries.length === 0) {
+            reportContainer.innerHTML = '<div class="text-center py-8 text-gray-500">Brak wpisów. Dodaj dane, aby zobaczyć raport.</div>';
+            return;
+        }
+        
+        const summary = {};
+        let grandTotal = 0;
+        
+        entries.forEach(entry => {
+            const code = entry.waste_code;
+            const weight = parseFloat(entry.weight_kg || 0);
+            summary[code] = (summary[code] || { totalKg: 0, count: 0 });
+            summary[code].totalKg += weight;
+            summary[code].count += 1;
+            grandTotal += weight;
+        });
+        
+        reportContainer.innerHTML = Object.keys(summary).sort().map(code => {
+            const data = summary[code];
+            return `
+                <div class="bg-gray-50 rounded-xl p-4 border border-gray-100 flex justify-between items-center">
+                    <div>
+                        <div class="font-bold text-slate-800">${code}</div>
+                        <div class="text-xs text-gray-400">${data.count} wpisów</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="font-bold text-emerald-600">${data.totalKg.toFixed(1)} kg</div>
+                        <div class="text-[10px] text-gray-400">${(data.totalKg/1000).toFixed(3)} Mg</div>
+                    </div>
+                </div>`;
+        }).join('');
+        
+        document.getElementById('totalWeight').textContent = `${grandTotal.toFixed(1)} kg`;
+        document.getElementById('totalWeightMg').textContent = `${(grandTotal/1000).toFixed(3)} Mg`;
+    }
+
+    function calculateLimits(entries) {
+        const totals = { '15 01 01': 0, '15 01 02': 0, '13 02 08': 0 };
+        entries.forEach(e => { if (totals.hasOwnProperty(e.waste_code)) totals[e.waste_code] += parseFloat(e.weight_kg || 0); });
+        
+        Object.keys(totals).forEach((code, index) => {
+            const cardNum = index + 1;
+            const weight = totals[code];
+            const limit = WASTE_LIMITS[code];
+            const perc = Math.min((weight / limit) * 100, 100);
+            
+            document.getElementById(`weight${cardNum}`).textContent = `${weight.toFixed(1)} kg`;
+            document.getElementById(`progressBar${cardNum}`).style.width = `${perc}%`;
+            
+            const bar = document.getElementById(`progressBar${cardNum}`);
+            if (perc >= 100) bar.className = "progress-bar bg-red-600 h-full rounded-full";
+            else if (perc >= 80) bar.className = "progress-bar bg-amber-500 h-full rounded-full";
+            else bar.className = "progress-bar bg-emerald-500 h-full rounded-full";
+        });
+    }
+
+    function displayRecentEntries(entries) {
+        const tableBody = document.getElementById('entriesTableBody');
+        const recent = entries.slice(0, 5);
+        if (recent.length === 0) return;
+
+        tableBody.innerHTML = recent.map(entry => `
+            <tr class="border-b border-gray-50">
+                <td class="py-3 px-2 text-xs text-gray-600">${new Date(entry.entry_date).toLocaleDateString('pl-PL')}</td>
+                <td class="py-3 px-2 text-xs font-bold">${entry.waste_code}</td>
+                <td class="py-3 px-2 text-xs text-right font-bold text-emerald-600">${entry.weight_kg} kg</td>
+            </tr>`).join('');
+    }
+
+    // --- ACTION FUNCTIONS ---
+
+    function openAddEntryModal() { document.getElementById('addEntryModal').style.display = 'block'; }
+    function closeAddEntryModal() { document.getElementById('addEntryModal').style.display = 'none'; document.getElementById('addEntryForm').reset(); }
+    function scrollToReports() { document.getElementById('reports').scrollIntoView({ behavior: 'smooth' }); }
+    
+    async function handleAddEntry(event) {
+        event.preventDefault();
+        const btn = event.target.querySelector('button');
+        btn.disabled = true;
+
+        const entry = {
+            user_id: currentUser.id,
+            waste_code: document.getElementById('wasteCode').value,
+            weight_kg: parseFloat(document.getElementById('wasteWeight').value),
+            entry_date: document.getElementById('entryDate').value
+        };
+
+        const { error } = await supabaseClient.from('waste_entries').insert([entry]);
+        if (error) { alert(error.message); btn.disabled = false; }
+        else { closeAddEntryModal(); await loadDashboard(); }
+    }
+
+    async function handleLogout() {
+        await supabaseClient.auth.signOut();
+        window.location.href = 'login.html';
+    }
+</script>
 
 </body>
 </html>

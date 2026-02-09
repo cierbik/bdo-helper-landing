@@ -10,8 +10,39 @@
     <style>
         body { font-family: 'Manrope', sans-serif; }
         h1, h2, h3 { font-family: 'Poppins', sans-serif; }
-        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px); }
-        .modal-content { background-color: white; margin: 10% auto; border-radius: 20px; max-width: 500px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
+        
+        /* English comment: Modal overlay - full screen centered */
+        .modal { 
+            display: none; 
+            position: fixed; 
+            z-index: 1000; 
+            left: 0; 
+            top: 0; 
+            width: 100%; 
+            height: 100%; 
+            background-color: rgba(0, 0, 0, 0.6); 
+            backdrop-filter: blur(4px);
+            overflow-y: auto; /* English comment: Allow scrolling on small screens */
+        }
+        
+        /* English comment: Modal content - centered horizontally and vertically */
+        .modal-content { 
+            background-color: white; 
+            margin: 5% auto; /* English comment: Auto margins center horizontally */
+            border-radius: 20px; 
+            max-width: 500px; 
+            width: 90%; /* English comment: Responsive width on mobile */
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            position: relative; /* English comment: For proper positioning */
+        }
+        
+        /* English comment: Better modal positioning on larger screens */
+        @media (min-width: 768px) {
+            .modal-content {
+                margin: 10vh auto; /* English comment: Vertical centering on desktop */
+                width: 500px; /* English comment: Fixed width on desktop */
+            }
+        }
     </style>
 </head>
 <body class="bg-gray-50 pb-24">
@@ -130,7 +161,7 @@
 
     <!-- English comment: Add Entry Modal -->
     <div id="addEntryModal" class="modal">
-        <div class="modal-content mx-4 p-6">
+        <div class="modal-content p-6">
             <div class="flex justify-between items-center mb-6">
                 <h3 class="text-xl font-bold text-slate-800">Nowy wpis ewidencji</h3>
                 <button onclick="closeAddEntryModal()" class="text-gray-400 text-2xl hover:text-gray-600 transition-colors">&times;</button>

@@ -70,7 +70,7 @@
                         <div class="text-sm font-bold text-slate-800 mb-3">Papier i tektura</div>
                         <div class="flex justify-between text-xs mb-2">
                             <span id="weight1" class="font-bold">0 kg</span>
-                            <span class="text-gray-400">Limit: 500kg</span>
+                            <span class="text-gray-400">Limit: 5000kg</span>
                         </div>
                         <div class="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
                             <div id="progressBar1" class="bg-emerald-500 h-full transition-all duration-500" style="width: 0%"></div>
@@ -81,7 +81,7 @@
                         <div class="text-sm font-bold text-slate-800 mb-3">Tworzywa sztuczne</div>
                         <div class="flex justify-between text-xs mb-2">
                             <span id="weight2" class="font-bold">0 kg</span>
-                            <span class="text-gray-400">Limit: 500kg</span>
+                            <span class="text-gray-400">Limit: 5000kg</span>
                         </div>
                         <div class="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
                             <div id="progressBar2" class="bg-emerald-500 h-full transition-all duration-500" style="width: 0%"></div>
@@ -92,7 +92,7 @@
                         <div class="text-sm font-bold text-slate-800 mb-3">Inne oleje silnikowe</div>
                         <div class="flex justify-between text-xs mb-2">
                             <span id="weight3" class="font-bold">0 kg</span>
-                            <span class="text-gray-400">Alert: 100kg</span>
+                            <span class="text-gray-400">Alert: 200kg</span>
                         </div>
                         <div class="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
                             <div id="progressBar3" class="bg-emerald-500 h-full transition-all duration-500" style="width: 0%"></div>
@@ -158,10 +158,10 @@
     window.SUPABASE_KEY = 'REPLACE_ME_KEY';
     
     const WASTE_LIMITS = {
-        '15 01 01': 500,
-        '15 01 02': 500,
-        '13 02 08': 100
-    };
+    '15 01 01': 5000, // Opakowania z papieru i tektury (5 ton)
+    '15 01 02': 5000, // Opakowania z tworzyw sztucznych (5 ton)
+    '13 02 08': 200   // Inne oleje silnikowe (0.2 tony = 200 kg)
+};
     async function initDashboard() {
         console.log("🚀 Dashboard: Starting initialization...");
 

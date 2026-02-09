@@ -489,9 +489,6 @@ async function handleAddEntry(event) {
         await loadUserEntries();
         renderDashboard();
 
-        // English comment: Show success message
-        showSuccess('Wpis dodany pomyślnie!');
-
     } catch (error) {
         console.error('💥 Error adding entry:', error);
         showError('Wystąpił błąd podczas dodawania wpisu: ' + error.message);

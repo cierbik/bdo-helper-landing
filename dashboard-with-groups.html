@@ -40,6 +40,23 @@
                 width: 500px;
             }
         }
+        
+        /* English comment: iOS Safari date input fix - prevent overflow */
+        input[type="date"] {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            min-height: 48px; /* English comment: iOS touch target size */
+        }
+        
+        /* English comment: Ensure date inputs fit within container on mobile */
+        @media (max-width: 640px) {
+            input[type="date"] {
+                font-size: 16px; /* English comment: Prevent iOS zoom on focus */
+                padding-left: 0.75rem;
+                padding-right: 0.5rem;
+            }
+        }
     </style>
 </head>
 <body class="bg-gray-50 pb-24">
@@ -145,7 +162,6 @@
                 <div>
                     <label class="block text-xs font-bold text-gray-500 uppercase mb-1">
                         Kod odpadu
-                        <span class="text-emerald-600 normal-case text-[10px] ml-2">(wpisz numer lub nazwę)</span>
                     </label>
                     <select id="wasteCode" required class="w-full border-2 border-gray-100 rounded-xl p-3 outline-none focus:border-emerald-500">
                         <option value="">Ładowanie kodów...</option>

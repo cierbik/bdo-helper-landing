@@ -158,10 +158,10 @@
     window.SUPABASE_KEY = 'REPLACE_ME_KEY';
     
     const WASTE_LIMITS = {
-        '15 01 01': 500,
-        '15 01 02': 500,
-        '13 02 08': 100
-    };
+    '15 01 01': 5000, // Opakowania z papieru i tektury (5 ton)
+    '15 01 02': 5000, // Opakowania z tworzyw sztucznych (5 ton)
+    '13 02 08': 200   // Inne oleje silnikowe (0.2 tony = 200 kg)
+};
     async function initDashboard() {
         console.log("🚀 Dashboard: Starting initialization...");
 

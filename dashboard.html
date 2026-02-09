@@ -51,7 +51,7 @@
                         <span class="text-xs font-bold bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full uppercase">Rok <span id="currentYear"></span></span>
                     </div>
                     <div id="reportsSummary" class="grid gap-3">
-                        </div>
+                    </div>
                     <div class="mt-6 pt-6 border-t border-gray-100 flex justify-between items-end">
                         <span class="text-gray-400 font-medium">ŁĄCZNA MASA:</span>
                         <div class="text-right">
@@ -103,37 +103,43 @@
         </div>
     </main>
 
-    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 flex justify-around py-3 z-50">
-        <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="flex flex-col items-center text-emerald-600">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-            <span class="text-[10px] mt-1 font-bold uppercase">Panel</span>
-        </button>
-        <button onclick="openAddEntryModal()" class="flex flex-col items-center text-gray-400">
-            <div class="bg-emerald-600 text-white p-2 rounded-full -mt-8 shadow-lg">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"/></svg>
-            </div>
-            <span class="text-[10px] mt-1 font-bold uppercase">Dodaj</span>
-        </button>
-        <a href="reports.html" class="py-3 flex flex-col items-center text-gray-600">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-            <span class="text-[10px] mt-1 font-bold uppercase">Raporty</span>
-        </button>
+    <!-- English comment: Mobile bottom navigation - fixed alignment -->
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 z-50">
+        <div class="grid grid-cols-3 gap-0">
+            <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="py-3 flex flex-col items-center text-emerald-600">
+                <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                <span class="text-[10px] mt-1 font-bold uppercase">Panel</span>
+            </button>
+            <button onclick="openAddEntryModal()" class="py-3 flex flex-col items-center text-gray-400 relative">
+                <div class="bg-emerald-600 text-white p-2 rounded-full -mt-8 shadow-lg">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"/></svg>
+                </div>
+                <span class="text-[10px] mt-1 font-bold uppercase">Dodaj</span>
+            </button>
+            <a href="reports.html" class="py-3 flex flex-col items-center text-gray-600">
+                <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                <span class="text-[10px] mt-1 font-bold uppercase">Raporty</span>
+            </a>
+        </div>
     </nav>
 
+    <!-- English comment: Desktop FAB button -->
     <button onclick="openAddEntryModal()" class="hidden md:flex fixed bottom-8 right-8 w-16 h-16 bg-emerald-600 text-white rounded-full shadow-2xl items-center justify-center hover:scale-110 transition-transform z-50">
         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
     </button>
 
+    <!-- English comment: Add Entry Modal -->
     <div id="addEntryModal" class="modal">
         <div class="modal-content mx-4 p-6">
             <div class="flex justify-between items-center mb-6">
                 <h3 class="text-xl font-bold text-slate-800">Nowy wpis ewidencji</h3>
-                <button onclick="closeAddEntryModal()" class="text-gray-400 text-2xl">&times;</button>
+                <button onclick="closeAddEntryModal()" class="text-gray-400 text-2xl hover:text-gray-600 transition-colors">&times;</button>
             </div>
             <form id="addEntryForm" onsubmit="handleAddEntry(event)" class="space-y-4">
                 <div>
                     <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Kod odpadu</label>
                     <select id="wasteCode" required class="w-full border-2 border-gray-100 rounded-xl p-3 outline-none focus:border-emerald-500">
+                        <option value="">Wybierz kod...</option>
                         <option value="15 01 01">15 01 01 - Papier</option>
                         <option value="15 01 02">15 01 02 - Tworzywa</option>
                         <option value="13 02 08">13 02 08 - Oleje</option>
@@ -141,140 +147,245 @@
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Masa [kg]</label>
-                    <input type="number" id="wasteWeight" required step="0.1" placeholder="np. 12.5" class="w-full border-2 border-gray-100 rounded-xl p-3 outline-none focus:border-emerald-500">
+                    <input type="number" id="wasteWeight" required step="0.1" min="0.1" placeholder="np. 12.5" class="w-full border-2 border-gray-100 rounded-xl p-3 outline-none focus:border-emerald-500">
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Data przekazania</label>
                     <input type="date" id="entryDate" required class="w-full border-2 border-gray-100 rounded-xl p-3 outline-none focus:border-emerald-500">
                 </div>
-                <button type="submit" class="w-full bg-emerald-600 text-white font-bold py-4 rounded-xl shadow-lg mt-4">Zapisz w bazie</button>
+                <button type="submit" class="w-full bg-emerald-600 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-emerald-700 transition-colors mt-4">
+                    Zapisz w bazie
+                </button>
             </form>
         </div>
     </div>
 
-   <script>
-    // English comment: Ensure variables are global
-    window.SUPABASE_URL = 'REPLACE_ME_URL';
-    window.SUPABASE_KEY = 'REPLACE_ME_KEY';
-    
-    const WASTE_LIMITS = {
-    '15 01 01': 5000, // Opakowania z papieru i tektury (5 ton)
-    '15 01 02': 5000, // Opakowania z tworzyw sztucznych (5 ton)
-    '13 02 08': 200   // Inne oleje silnikowe (0.2 tony = 200 kg)
-};
-    async function initDashboard() {
-        console.log("🚀 Dashboard: Starting initialization...");
+    <script>
+        // English comment: Ensure variables are global
+        window.SUPABASE_URL = 'REPLACE_ME_URL';
+        window.SUPABASE_KEY = 'REPLACE_ME_KEY';
+        
+        // English comment: Waste code limits configuration (in kg)
+        const WASTE_LIMITS = {
+            '15 01 01': 5000, // Opakowania z papieru i tektury (5 ton)
+            '15 01 02': 5000, // Opakowania z tworzyw sztucznych (5 ton)
+            '13 02 08': 200   // Inne oleje silnikowe (0.2 tony = 200 kg)
+        };
 
-        // English comment: Wait for Supabase library to be available
-        if (typeof supabase === 'undefined') {
-            console.error("❌ Error: Supabase library not loaded from CDN!");
-            return;
-        }
+        // English comment: Global variable to store current user
+        let currentUser = null;
 
-        try {
-            const client = supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
-            console.log("✅ Dashboard: Client created");
+        // English comment: Initialize dashboard on page load
+        async function initDashboard() {
+            console.log("🚀 Dashboard: Starting initialization...");
 
-            // English comment: Check session
-            const { data: { session }, error } = await client.auth.getSession();
-
-            if (error || !session) {
-                console.warn("⚠️ No session, going to login");
-                window.location.href = 'login.html';
+            // English comment: Wait for Supabase library to be available
+            if (typeof supabase === 'undefined') {
+                console.error("❌ Error: Supabase library not loaded from CDN!");
                 return;
             }
 
-            console.log("👤 User authenticated:", session.user.email);
-            
-            // English comment: Fill basic UI info
-            document.getElementById('userEmail').textContent = session.user.email;
-            document.getElementById('currentYear').textContent = new Date().getFullYear();
-            
-            // English comment: Reference the client globally and load data
-            window.supabaseClient = client;
-            await loadDashboardData(session.user.id);
+            try {
+                const client = supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
+                console.log("✅ Dashboard: Client created");
 
-        } catch (err) {
-            console.error("💥 Dashboard Crash:", err);
-        }
-    }
+                // English comment: Check session
+                const { data: { session }, error } = await client.auth.getSession();
 
-    async function loadDashboardData(userId) {
-        console.log("📊 Loading data for user:", userId);
-        const { data: entries, error } = await window.supabaseClient
-            .from('waste_entries')
-            .select('*')
-            .eq('user_id', userId);
+                if (error || !session) {
+                    console.warn("⚠️ No session, going to login");
+                    window.location.href = 'login.html';
+                    return;
+                }
 
-        if (error) {
-            console.error("❌ DB Error:", error.message);
-            return;
-        }
+                console.log("👤 User authenticated:", session.user.email);
+                
+                // English comment: Store current user globally
+                currentUser = session.user;
+                
+                // English comment: Fill basic UI info
+                document.getElementById('userEmail').textContent = session.user.email;
+                document.getElementById('currentYear').textContent = new Date().getFullYear();
+                
+                // English comment: Set today's date as default in the form
+                document.getElementById('entryDate').valueAsDate = new Date();
+                
+                // English comment: Reference the client globally and load data
+                window.supabaseClient = client;
+                await loadDashboardData(session.user.id);
 
-        console.log("📈 Data loaded:", entries.length, "rows");
-        renderUI(entries || []);
-        
-        document.getElementById('loadingState').classList.add('hidden');
-        document.getElementById('dashboardContent').classList.remove('hidden');
-    }
-    async function handleLogout() {
-    if (!window.supabaseClient) return;
-    const { error } = await window.supabaseClient.auth.signOut();
-    window.location.href = 'login.html';
-    }
-
-    function closeAddEntryModal() {
-        document.getElementById('addEntryModal').style.display = 'none';
-    }
-    function renderUI(entries) {
-        console.log("🎨 Rendering UI with entries:", entries);
-        
-        const totals = {'15 01 01': 0, '15 01 02': 0, '13 02 08': 0};
-        let grandTotal = 0;
-
-        entries.forEach(e => {
-            const w = parseFloat(e.weight_kg) || 0;
-            if (totals.hasOwnProperty(e.waste_code)) totals[e.waste_code] += w;
-            grandTotal += w;
-        });
-
-        // 1. Update Annual Summary (The table at the top)
-        const summaryEl = document.getElementById('reportsSummary');
-        if (summaryEl) {
-            summaryEl.innerHTML = Object.entries(totals).map(([code, weight]) => `
-                <div class="flex justify-between items-center p-4 bg-gray-50 rounded-xl border border-gray-100">
-                    <span class="font-bold text-slate-700">${code}</span>
-                    <span class="font-bold text-emerald-600">${weight.toFixed(1)} kg</span>
-                </div>
-            `).join('');
-        }
-
-        // 2. Update Grand Totals
-        const totalWeightEl = document.getElementById('totalWeight');
-        const totalMgEl = document.getElementById('totalWeightMg');
-        if (totalWeightEl) totalWeightEl.textContent = `${grandTotal.toFixed(1)} kg`;
-        if (totalMgEl) totalMgEl.textContent = `${(grandTotal / 1000).toFixed(3)} Mg`;
-
-        // 3. Update Progress Bars & Limit Cards
-        Object.keys(totals).forEach((code, i) => {
-            const weight = totals[code];
-            const limit = WASTE_LIMITS[code] || 500;
-            const percentage = Math.min((weight / limit) * 100, 100);
-            
-            const weightDisplay = document.getElementById(`weight${i+1}`);
-            const progressBar = document.getElementById(`progressBar${i+1}`);
-            
-            if (weightDisplay) weightDisplay.textContent = `${weight.toFixed(1)} kg`;
-            if (progressBar) {
-                progressBar.style.width = `${percentage}%`;
-                // Set color based on usage
-                progressBar.className = "h-full transition-all duration-500 " + 
-                    (percentage >= 100 ? "bg-red-600" : percentage > 80 ? "bg-amber-500" : "bg-emerald-500");
+            } catch (err) {
+                console.error("💥 Dashboard Crash:", err);
             }
-        });
-    }
+        }
 
-        // Start everything when DOM is ready
+        // English comment: Load dashboard data from Supabase
+        async function loadDashboardData(userId) {
+            console.log("📊 Loading data for user:", userId);
+            
+            // English comment: Get current year for filtering
+            const currentYear = new Date().getFullYear();
+            const yearStart = `${currentYear}-01-01`;
+            const yearEnd = `${currentYear}-12-31`;
+            
+            // English comment: Fetch waste entries for current year
+            const { data: entries, error } = await window.supabaseClient
+                .from('waste_entries')
+                .select('*')
+                .eq('user_id', userId)
+                .gte('entry_date', yearStart)
+                .lte('entry_date', yearEnd)
+                .order('entry_date', { ascending: false });
+
+            if (error) {
+                console.error("❌ DB Error:", error.message);
+                alert('Błąd pobierania danych: ' + error.message);
+                return;
+            }
+
+            console.log("📈 Data loaded:", entries.length, "rows");
+            renderUI(entries || []);
+            
+            // English comment: Hide loading, show dashboard
+            document.getElementById('loadingState').classList.add('hidden');
+            document.getElementById('dashboardContent').classList.remove('hidden');
+        }
+
+        // English comment: Render UI with data
+        function renderUI(entries) {
+            console.log("🎨 Rendering UI with entries:", entries);
+            
+            const totals = {'15 01 01': 0, '15 01 02': 0, '13 02 08': 0};
+            let grandTotal = 0;
+
+            entries.forEach(e => {
+                const w = parseFloat(e.weight_kg) || 0;
+                if (totals.hasOwnProperty(e.waste_code)) totals[e.waste_code] += w;
+                grandTotal += w;
+            });
+
+            // English comment: Update Annual Summary (The table at the top)
+            const summaryEl = document.getElementById('reportsSummary');
+            if (summaryEl) {
+                summaryEl.innerHTML = Object.entries(totals).map(([code, weight]) => `
+                    <div class="flex justify-between items-center p-4 bg-gray-50 rounded-xl border border-gray-100">
+                        <span class="font-bold text-slate-700">${code}</span>
+                        <span class="font-bold text-emerald-600">${weight.toFixed(1)} kg</span>
+                    </div>
+                `).join('');
+            }
+
+            // English comment: Update Grand Totals
+            const totalWeightEl = document.getElementById('totalWeight');
+            const totalMgEl = document.getElementById('totalWeightMg');
+            if (totalWeightEl) totalWeightEl.textContent = `${grandTotal.toFixed(1)} kg`;
+            if (totalMgEl) totalMgEl.textContent = `${(grandTotal / 1000).toFixed(3)} Mg`;
+
+            // English comment: Update Progress Bars & Limit Cards
+            Object.keys(totals).forEach((code, i) => {
+                const weight = totals[code];
+                const limit = WASTE_LIMITS[code] || 500;
+                const percentage = Math.min((weight / limit) * 100, 100);
+                
+                const weightDisplay = document.getElementById(`weight${i+1}`);
+                const progressBar = document.getElementById(`progressBar${i+1}`);
+                
+                if (weightDisplay) weightDisplay.textContent = `${weight.toFixed(1)} kg`;
+                if (progressBar) {
+                    progressBar.style.width = `${percentage}%`;
+                    // English comment: Set color based on usage percentage
+                    progressBar.className = "h-full transition-all duration-500 " + 
+                        (percentage >= 100 ? "bg-red-600" : percentage > 80 ? "bg-amber-500" : "bg-emerald-500");
+                }
+            });
+        }
+
+        // English comment: Handle logout
+        async function handleLogout() {
+            if (!window.supabaseClient) return;
+            const { error } = await window.supabaseClient.auth.signOut();
+            if (error) {
+                console.error('Logout error:', error);
+            }
+            window.location.href = 'login.html';
+        }
+
+        // English comment: Open add entry modal
+        function openAddEntryModal() {
+            document.getElementById('addEntryModal').style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+
+        // English comment: Close add entry modal
+        function closeAddEntryModal() {
+            document.getElementById('addEntryModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+            document.getElementById('addEntryForm').reset();
+            // English comment: Reset date to today
+            document.getElementById('entryDate').valueAsDate = new Date();
+        }
+
+        // English comment: Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('addEntryModal');
+            if (event.target === modal) {
+                closeAddEntryModal();
+            }
+        }
+
+        // English comment: Handle adding new waste entry
+        async function handleAddEntry(event) {
+            event.preventDefault();
+            
+            if (!window.supabaseClient || !currentUser) {
+                alert('Błąd: Brak połączenia z bazą danych');
+                return;
+            }
+            
+            const wasteCode = document.getElementById('wasteCode').value;
+            const weight = parseFloat(document.getElementById('wasteWeight').value);
+            const entryDate = document.getElementById('entryDate').value;
+            
+            // English comment: Validate inputs
+            if (!wasteCode || !weight || !entryDate) {
+                alert('Proszę wypełnić wszystkie pola');
+                return;
+            }
+            
+            try {
+                console.log('📝 Adding entry:', { wasteCode, weight, entryDate });
+                
+                // English comment: Insert new entry into Supabase
+                const { data, error } = await window.supabaseClient
+                    .from('waste_entries')
+                    .insert([
+                        {
+                            user_id: currentUser.id,
+                            waste_code: wasteCode,
+                            weight_kg: weight,
+                            entry_date: entryDate
+                        }
+                    ]);
+                
+                if (error) {
+                    console.error('❌ Insert error:', error);
+                    alert('Błąd dodawania wpisu: ' + error.message);
+                    return;
+                }
+                
+                console.log('✅ Entry added successfully');
+                
+                // English comment: Close modal and reload dashboard
+                closeAddEntryModal();
+                await loadDashboardData(currentUser.id);
+                
+            } catch (error) {
+                console.error('💥 Error adding entry:', error);
+                alert('Wystąpił błąd podczas dodawania wpisu');
+            }
+        }
+
+        // English comment: Start everything when DOM is ready
         document.addEventListener('DOMContentLoaded', initDashboard);
     </script>
 </body>

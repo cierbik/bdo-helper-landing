@@ -3,1320 +3,527 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BDO Helper | Pilnuj limitów i generuj KPO w 15 sekund</title>
-<meta name="description" content="Prosty asystent BDO dla małych firm. Alerty o limitach zwolnień, szybki generator KPO i gotowe zestawienia do raportu rocznego. Sprawdź Early Access!">
-    <meta property="og:title" content="BDO Helper - Asystent dla Twojej firmy">
-    <meta property="og:description" content="Zadbaj o porządek w ewidencji odpadów. Zapisz się na beta testy.">
-    <meta property="og:url" content="https://bdo-helper.netlify.app">
-    <!-- Tailwind CSS via CDN -->
+    <title>BDO Helper - Ewidencja Odpadów bez Stresu | Wersja Beta</title>
+    <meta name="description" content="Prowadź BDO bez stresu i arkuszy kalkulacyjnych. Darmowy dostęp w wersji Beta. Automatyczne sumowanie limitów, wyszukiwarka kodów, gotowe raporty.">
+    
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Supabase JS Client via CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
-    <!-- Google Fonts - Distinctive typography for professional SaaS feel -->
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <style>
-        /* Custom CSS variables for consistent theming */
-        :root {
-            --primary-forest: #1a5f4a;
-            --primary-emerald: #10b981;
-            --accent-blue: #0ea5e9;
-            --dark-slate: #1e293b;
-            --light-sage: #f0fdf4;
-            --warning-amber: #f59e0b;
+        body { font-family: 'Manrope', sans-serif; }
+        h1, h2, h3, h4, h5, h6 { font-family: 'Poppins', sans-serif; }
+        
+        /* English comment: Smooth scroll behavior */
+        html { scroll-behavior: smooth; }
+        
+        /* English comment: Dark mode transitions */
+        body, section, div, header, footer {
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
         
-        body {
-            font-family: 'Manrope', sans-serif;
-        }
-        
-        h1, h2, h3, h4, h5, h6 {
-            font-family: 'Poppins', sans-serif;
-        }
-        
-        /* Smooth scroll behavior */
-        html {
-            scroll-behavior: smooth;
-        }
-        
-        /* Hero gradient background with subtle animation */
-        .hero-gradient {
-            background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .hero-gradient::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: radial-gradient(circle at 20% 50%, rgba(16, 185, 129, 0.1) 0%, transparent 50%),
-                        radial-gradient(circle at 80% 80%, rgba(14, 165, 233, 0.1) 0%, transparent 50%);
-            animation: pulse-gradient 8s ease-in-out infinite;
-        }
-        
-        @keyframes pulse-gradient {
-            0%, 100% { opacity: 0.5; }
-            50% { opacity: 1; }
-        }
-        
-        /* Floating animation for hero image */
+        /* English comment: Custom animations */
         @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-20px); }
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
         }
         
         .float-animation {
-            animation: float 6s ease-in-out infinite;
+            animation: float 3s ease-in-out infinite;
         }
         
-        /* Fade in animation for sections */
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .fade-in-up {
-            animation: fadeInUp 0.8s ease-out forwards;
-        }
-        
-        /* Staggered delays for feature cards */
-        .feature-card:nth-child(1) { animation-delay: 0.1s; }
-        .feature-card:nth-child(2) { animation-delay: 0.2s; }
-        .feature-card:nth-child(3) { animation-delay: 0.3s; }
-        .feature-card:nth-child(4) { animation-delay: 0.4s; }
-        
-        /* Custom button hover effects */
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary-emerald) 0%, var(--primary-forest) 100%);
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
-        }
-        
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
-        }
-        
-        /* Modal styles */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(4px);
-            animation: fadeIn 0.3s ease;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        .modal-content {
-            background-color: white;
-            margin: 10% auto;
-            padding: 0;
-            border-radius: 16px;
-            max-width: 500px;
-            animation: slideDown 0.4s ease;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-        }
-        
-        @keyframes slideDown {
-            from {
-                transform: translateY(-50px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-        
-        /* Icon container styling */
-        .icon-container {
+        /* English comment: Gradient text */
+        .gradient-text {
             background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            transition: transform 0.3s ease;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
         
-        .feature-card:hover .icon-container {
-            transform: scale(1.1) rotate(5deg);
-        }
-        
-        /* Trust badge styling */
-        .trust-badge {
-            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-            border: 2px solid #f59e0b;
-        }
-        
-        /* Noise texture overlay for depth */
-        .noise-overlay {
+        /* English comment: Video container aspect ratio */
+        .video-container {
             position: relative;
+            padding-bottom: 56.25%; /* 16:9 aspect ratio */
+            height: 0;
+            overflow: hidden;
         }
         
-        .noise-overlay::after {
-            content: '';
+        .video-container iframe {
             position: absolute;
             top: 0;
             left: 0;
-            right: 0;
-            bottom: 0;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
-            pointer-events: none;
-            opacity: 0.4;
+            width: 100%;
+            height: 100%;
+            border-radius: 1rem;
+        }
+        
+        /* English comment: Dark mode styles */
+        body.dark-mode {
+            background-color: #0f172a;
+            color: #e2e8f0;
+        }
+        
+        body.dark-mode .bg-white {
+            background-color: #1e293b;
+        }
+        
+        body.dark-mode .bg-gray-50 {
+            background-color: #0f172a;
+        }
+        
+        body.dark-mode .text-slate-900 {
+            color: #f1f5f9;
+        }
+        
+        body.dark-mode .text-slate-800 {
+            color: #e2e8f0;
+        }
+        
+        body.dark-mode .text-gray-600 {
+            color: #94a3b8;
+        }
+        
+        body.dark-mode .text-gray-500 {
+            color: #64748b;
+        }
+        
+        body.dark-mode .border-gray-100 {
+            border-color: #334155;
+        }
+        
+        body.dark-mode .border-gray-200 {
+            border-color: #475569;
+        }
+        
+        body.dark-mode .bg-gradient-to-br.from-emerald-50 {
+            background: linear-gradient(to bottom right, #064e3b, #0f172a, #1e3a8a);
+        }
+        
+        body.dark-mode .bg-gradient-to-br.from-gray-50 {
+            background: linear-gradient(to bottom right, #1e293b, #0f172a);
+        }
+        
+        body.dark-mode .shadow-lg,
+        body.dark-mode .shadow-xl,
+        body.dark-mode .shadow-2xl {
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+        
+        body.dark-mode .bg-white\/95 {
+            background-color: rgba(30, 41, 59, 0.95);
         }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-900">
+<body class="bg-white dark-mode">
 
-<!-- Sticky Navigation Header -->
-<header class="fixed top-0 left-0 right-0 z-50 bg-white shadow-md transition-all duration-300">
-    <nav class="container mx-auto px-4 md:px-6 py-4 flex items-center justify-between">
-        <!-- Logo -->
-        <div class="flex items-center space-x-2">
-            <svg class="w-8 h-8 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-            </svg>
-            <span class="text-xl md:text-2xl font-bold text-slate-800">BDO Helper</span>
-        </div>
-        
-        <!-- Navigation buttons -->
-        <div class="flex items-center space-x-2 md:space-x-4">
-            <!-- Login link - icon on mobile, text on desktop -->
-            <a href="login.html" class="group text-slate-600 hover:text-emerald-600 transition-all duration-200 flex items-center space-x-2" title="Zaloguj się">
-                <span class="p-1.5 rounded-lg group-hover:bg-emerald-50 transition-colors">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 22 22">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                </span>
-                
-                <span class="hidden md:block font-semibold text-sm">
-                    Zaloguj się
-                </span>
-            </a>
+    <!-- Navigation -->
+    <header class="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm shadow-sm">
+        <nav class="container mx-auto px-4 md:px-6 py-4 flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+                <svg class="w-8 h-8 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                <span class="text-xl md:text-2xl font-bold text-slate-800">BDO Helper</span>
+            </div>
             
-            <!-- Primary CTA - always visible -->
-            <a href="register.html" class="btn-primary text-white px-4 py-2 md:px-6 md:py-3 rounded-full font-semibold hover:shadow-lg text-sm md:text-base">
-                Rejestracja
-            </a>
-        </div>
-    </nav>
-</header>
+            <div class="flex items-center space-x-2 md:space-x-4">
+                <!-- English comment: Dark mode toggle -->
+                <button 
+                    onclick="toggleDarkMode()" 
+                    id="darkModeToggle"
+                    class="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                    title="Przełącz tryb">
+                    <!-- English comment: Sun icon (visible in dark mode) -->
+                    <svg id="sunIcon" class="w-5 h-5 text-gray-600 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+                    </svg>
+                    <!-- English comment: Moon icon (visible in light mode) -->
+                    <svg id="moonIcon" class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+                    </svg>
+                </button>
+                
+                <a href="login.html" class="text-slate-600 hover:text-emerald-600 transition-colors flex items-center" title="Zaloguj się">
+                    <span class="md:hidden">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
+                        </svg>
+                    </span>
+                    <span class="hidden md:block font-medium">
+                        Zaloguj się
+                    </span>
+                </a>
+                
+                <a href="register.html" class="bg-emerald-600 text-white px-4 py-2 md:px-6 md:py-3 rounded-full font-semibold hover:bg-emerald-700 hover:shadow-lg transition-all text-sm md:text-base">
+                    Rejestracja
+                </a>
+            </div>
+        </nav>
+    </header>
 
     <!-- Hero Section -->
-    <section class="hero-gradient text-white pt-32 pb-20 relative">
-        <div class="container mx-auto px-4">
-            <div class="grid md:grid-cols-2 gap-12 items-center relative z-10">
-                <!-- Hero Content -->
-                <div class="fade-in-up">
-                    <!-- Trust badge -->
-                    <div class="trust-badge inline-flex items-center space-x-2 px-4 py-2 rounded-full mb-6">
-                        <svg class="w-5 h-5 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+    <section class="pt-32 pb-20 md:pt-40 md:pb-28 bg-gradient-to-br from-emerald-50 via-white to-blue-50">
+        <div class="container mx-auto px-4 md:px-6">
+            <div class="max-w-4xl mx-auto text-center">
+                <!-- Beta Badge -->
+                <div class="inline-flex items-center space-x-2 bg-emerald-100 text-emerald-700 px-4 py-2 rounded-full mb-6">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                    </svg>
+                    <span class="font-bold text-sm">Wersja Beta – Dostęp całkowicie darmowy!</span>
+                </div>
+
+                <!-- Headline -->
+                <h1 class="text-4xl md:text-6xl font-bold text-slate-900 mb-6 leading-tight">
+                    Prowadź BDO bez stresu<br/>
+                    <span class="gradient-text">i arkuszy kalkulacyjnych</span>
+                </h1>
+
+                <!-- Subheadline -->
+                <p class="text-lg md:text-xl text-gray-600 mb-8 leading-relaxed max-w-3xl mx-auto">
+                    Twoja ewidencja odpadów pod kontrolą. Automatyczne sumowanie limitów, błyskawiczne wyszukiwanie kodów i gotowe raporty.
+                </p>
+
+                <!-- Price Badge -->
+                <div class="inline-flex flex-col items-center bg-white rounded-2xl shadow-2xl p-6 mb-8 border-2 border-emerald-200">
+                    <div class="text-5xl md:text-6xl font-bold text-emerald-600 mb-2">0 zł</div>
+                    <div class="text-sm md:text-base text-gray-600 font-semibold">Zacznij testy już dziś</div>
+                    <div class="mt-2 text-xs text-gray-500">Pełny dostęp w wersji Beta</div>
+                </div>
+
+                <!-- CTA Button -->
+                <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                    <a href="register.html" class="w-full sm:w-auto bg-gradient-to-r from-emerald-600 to-emerald-500 text-white px-8 py-4 rounded-full font-bold text-lg hover:shadow-2xl hover:scale-105 transition-all inline-flex items-center justify-center space-x-2">
+                        <span>Zarejestruj się za darmo</span>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
                         </svg>
-                        <span class="text-sm font-semibold text-amber-800">Zgodne z wymogami 2026</span>
+                    </a>
+                    <a href="#video" class="w-full sm:w-auto border-2 border-emerald-600 text-emerald-600 px-8 py-4 rounded-full font-bold text-lg hover:bg-emerald-50 transition-all inline-flex items-center justify-center space-x-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <span>Zobacz jak działa</span>
+                    </a>
+                </div>
+
+                <!-- Trust indicators -->
+                <div class="mt-12 flex flex-wrap justify-center items-center gap-6 text-sm text-gray-500">
+                    <div class="flex items-center space-x-2">
+                        <svg class="w-5 h-5 text-emerald-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                        </svg>
+                        <span>Bez karty kredytowej</span>
                     </div>
-                    
-                    <!-- Main Headline -->
-                    <h1 class="text-5xl md:text-6xl font-bold leading-tight mb-6">
-                        Zarządzaj BDO<br/>
-                        <span class="text-emerald-400">bez stresu i kar</span>
-                    </h1>
-                    
-                    <!-- Subheadline addressing pain points -->
-                    <p class="text-xl text-gray-300 mb-8 leading-relaxed">
-                        Koniec z zawiłym systemem rządowym. Intuicyjna aplikacja stworzona dla małych firm - warsztatów, salonów kosmetycznych i budowlanki. <strong class="text-white">Oszczędź czas i uniknij kar do 10 000 zł.</strong>
-                    </p>
-                    
-                    <!-- CTA Buttons -->
-                    <div class="flex flex-col sm:flex-row gap-4">
-                        <a href="#pricing" class="btn-primary text-white px-8 py-4 rounded-full font-semibold text-lg text-center">
-                            Sprawdź dostępność
-                        </a>
-                        <a href="#features" class="bg-white/10 backdrop-blur-sm border-2 border-white/30 text-white px-8 py-4 rounded-full font-semibold text-lg text-center hover:bg-white/20 transition-all">
-                            Zobacz funkcje
-                        </a>
+                    <div class="flex items-center space-x-2">
+                        <svg class="w-5 h-5 text-emerald-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                        </svg>
+                        <span>Działa na telefonie</span>
                     </div>
-                    
-                    <!-- Social proof metrics -->
-                    <div class="grid grid-cols-3 gap-6 mt-12 pt-8 border-t border-white/20">
-                        <div>
-                            <div class="text-3xl font-bold text-emerald-400">5 min</div>
-                            <div class="text-sm text-gray-400">Średni czas raportu</div>
-                        </div>
-                        <div>
-                            <div class="text-3xl font-bold text-emerald-400">0 zł</div>
-                            <div class="text-sm text-gray-400">Kar unikniętych</div>
-                        </div>
-                        <div>
-                            <div class="text-3xl font-bold text-emerald-400">24/7</div>
-                            <div class="text-sm text-gray-400">Dostęp mobilny</div>
-                        </div>
+                    <div class="flex items-center space-x-2">
+                        <svg class="w-5 h-5 text-emerald-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                        </svg>
+                        <span>Start w 2 minuty</span>
                     </div>
                 </div>
-                
-                <!-- Hero Image/Mockup Placeholder -->
-                <div class="relative float-animation">
-                    <div class="bg-gradient-to-br from-emerald-400 to-blue-500 rounded-3xl p-8 shadow-2xl">
-                        <!-- Mockup placeholder - phone frame -->
-                        <div class="bg-white rounded-2xl overflow-hidden shadow-xl">
-                            <div class="bg-gradient-to-r from-emerald-500 to-emerald-600 p-4 text-white">
-                                <div class="flex items-center justify-between mb-4">
-                                    <div class="flex items-center space-x-2">
-                                        <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                                            </svg>
-                                        </div>
-                                        <span class="font-semibold">BDO Helper</span>
-                                    </div>
-                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-                                    </svg>
-                                </div>
-                                <h3 class="text-sm font-medium opacity-80">Twoje raporty</h3>
+            </div>
+        </div>
+    </section>
+
+    <!-- Video Section -->
+    <section id="video" class="py-20 bg-white">
+        <div class="container mx-auto px-4 md:px-6">
+            <div class="max-w-5xl mx-auto">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
+                        Zobacz jak to działa
+                    </h2>
+                    <p class="text-lg text-gray-600">
+                        Poznaj BDO Helper w 2 minuty
+                    </p>
+                </div>
+
+                <!-- Video Container -->
+                <div class="video-container bg-gradient-to-br from-emerald-100 to-blue-100 rounded-2xl shadow-2xl">
+                    <!-- English comment: Replace with actual YouTube/Vimeo embed when available -->
+                    <div class="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-emerald-500/20 to-blue-500/20 rounded-2xl">
+                        <div class="text-center">
+                            <div class="w-24 h-24 bg-white/90 rounded-full flex items-center justify-center mx-auto mb-4 float-animation">
+                                <svg class="w-12 h-12 text-emerald-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"/>
+                                </svg>
                             </div>
-                            
-                            <div class="p-6 space-y-4">
-                                <!-- Mock report card -->
-                                <div class="border-2 border-emerald-100 rounded-lg p-4 bg-emerald-50">
-                                    <div class="flex items-start justify-between mb-2">
-                                        <div class="flex-1">
-                                            <div class="text-xs text-gray-500 mb-1">Kod odpadu</div>
-                                            <div class="font-semibold text-gray-800">17 01 07 - Zmieszane odpady</div>
-                                        </div>
-                                        <span class="bg-emerald-500 text-white text-xs px-2 py-1 rounded-full">Gotowe</span>
-                                    </div>
-                                    <div class="grid grid-cols-2 gap-3 mt-3 text-sm">
-                                        <div>
-                                            <div class="text-xs text-gray-500">Masa</div>
-                                            <div class="font-medium">450 kg</div>
-                                        </div>
-                                        <div>
-                                            <div class="text-xs text-gray-500">Limit</div>
-                                            <div class="font-medium text-emerald-600">2.5 t</div>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <!-- Mock search bar -->
-                                <div class="bg-gray-100 rounded-lg p-3 flex items-center space-x-2">
-                                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                                    </svg>
-                                    <span class="text-gray-500 text-sm">Szukaj po nazwie...</span>
-                                </div>
-                                
-                                <!-- Mock list items -->
-                                <div class="space-y-2">
-                                    <div class="flex items-center space-x-3 p-3 bg-white rounded-lg border border-gray-200">
-                                        <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
-                                            </svg>
-                                        </div>
-                                        <div class="flex-1">
-                                            <div class="text-sm font-medium text-gray-800">Opakowania metalowe</div>
-                                            <div class="text-xs text-gray-500">15 01 04</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            <p class="text-white font-bold text-xl">Film demonstracyjny wkrótce</p>
+                            <p class="text-white/80 text-sm mt-2">Funkcje już dostępne – zaloguj się i przetestuj!</p>
                         </div>
                     </div>
-                    
-                    <!-- Decorative elements -->
-                    <div class="absolute -top-6 -right-6 w-24 h-24 bg-blue-400 rounded-full opacity-20 blur-2xl"></div>
-                    <div class="absolute -bottom-6 -left-6 w-32 h-32 bg-emerald-400 rounded-full opacity-20 blur-2xl"></div>
+                    <!-- English comment: Use this structure for real video:
+                    <iframe 
+                        src="https://www.youtube.com/embed/YOUR_VIDEO_ID" 
+                        frameborder="0" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                        allowfullscreen>
+                    </iframe>
+                    -->
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Features Section -->
-    <section id="features" class="py-20 bg-white noise-overlay">
-        <div class="container mx-auto px-4">
-            <!-- Section Header -->
+    <section class="py-20 bg-gradient-to-br from-gray-50 to-white">
+        <div class="container mx-auto px-4 md:px-6">
             <div class="text-center mb-16">
-                <h2 class="text-4xl md:text-5xl font-bold text-slate-800 mb-4">
-                    Wszystko czego potrzebujesz<br/>
-                    <span class="text-emerald-600">w jednym miejscu</span>
+                <h2 class="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
+                    Funkcje, które realnie oszczędzają czas
                 </h2>
-                <p class="text-xl text-gray-600 max-w-2xl mx-auto">
-                    Zapomnij o zawiłych kodach i skomplikowanych formularzach. BDO Helper to narzędzie stworzone przez przedsiębiorców dla przedsiębiorców.
+                <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+                    Zaprojektowane z myślą o małych firmach, które nie mają czasu na kombinowanie
                 </p>
             </div>
-            
-            <!-- Features Grid -->
-            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-                <!-- Feature 1: Search by name -->
-                <div class="feature-card fade-in-up bg-gradient-to-br from-gray-50 to-white rounded-2xl p-8 border border-gray-200 hover:shadow-xl transition-all duration-300">
-                    <div class="icon-container w-16 h-16 rounded-xl flex items-center justify-center mb-6">
-                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+
+            <div class="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+                <!-- Feature 1 -->
+                <div class="bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-shadow border border-gray-100">
+                    <div class="w-16 h-16 bg-emerald-100 rounded-xl flex items-center justify-center mb-6">
+                        <svg class="w-8 h-8 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                         </svg>
                     </div>
-                    <h3 class="text-xl font-bold text-slate-800 mb-3">Intuicyjna wyszukiwarka kodów</h3>
+                    <h3 class="text-xl font-bold text-slate-900 mb-3">Inteligentna Wyszukiwarka</h3>
                     <p class="text-gray-600 leading-relaxed">
-                        Szukaj kodów odpadów <strong>po nazwie, nie numerach</strong>. Wpisz "opakowania plastikowe" zamiast zapamiętywać "15 01 02".
+                        Nie musisz znać kodów na pamięć. Wyszukuj po nazwie lub numerze – system podpowie Ci właściwy kod w ułamku sekundy.
                     </p>
                 </div>
-                
-                <!-- Feature 2: Weight limit alerts -->
-                <div class="feature-card fade-in-up bg-gradient-to-br from-gray-50 to-white rounded-2xl p-8 border border-gray-200 hover:shadow-xl transition-all duration-300">
-                    <div class="icon-container w-16 h-16 rounded-xl flex items-center justify-center mb-6">
-                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+
+                <!-- Feature 2 -->
+                <div class="bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-shadow border border-gray-100">
+                    <div class="w-16 h-16 bg-blue-100 rounded-xl flex items-center justify-center mb-6">
+                        <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
                         </svg>
                     </div>
-                    <h3 class="text-xl font-bold text-slate-800 mb-3">Alerty limitów</h3>
+                    <h3 class="text-xl font-bold text-slate-900 mb-3">Automatyczna Agregacja</h3>
                     <p class="text-gray-600 leading-relaxed">
-                        Otrzymuj <strong>powiadomienia przed przekroczeniem limitów wagowych</strong>. Nigdy więcej kar za nieświadome naruszenia.
+                        System sam sumuje opakowania i inne odpady do wspólnych limitów rocznych. Widzisz pasek postępu w czasie rzeczywistym – bez kalkulatora.
                     </p>
                 </div>
-                
-                <!-- Feature 3: Report generator -->
-                <div class="feature-card fade-in-up bg-gradient-to-br from-gray-50 to-white rounded-2xl p-8 border border-gray-200 hover:shadow-xl transition-all duration-300">
-                    <div class="icon-container w-16 h-16 rounded-xl flex items-center justify-center mb-6">
-                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+
+                <!-- Feature 3 -->
+                <div class="bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-shadow border border-gray-100">
+                    <div class="w-16 h-16 bg-purple-100 rounded-xl flex items-center justify-center mb-6">
+                        <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/>
                         </svg>
                     </div>
-                    <h3 class="text-xl font-bold text-slate-800 mb-3">Generator raportów</h3>
+                    <h3 class="text-xl font-bold text-slate-900 mb-3">Pełna Kontrola</h3>
                     <p class="text-gray-600 leading-relaxed">
-                        Twórz <strong>gotowe raporty początkowe w 5 minut</strong>. Skopiuj i wklej do oficjalnego portalu BDO - bez błędów.
+                        Dodawaj i usuwaj wpisy jednym kliknięciem. Twoja historia jest zawsze przejrzysta – widzisz co, kiedy i ile przekazałeś.
                     </p>
                 </div>
-                
-                <!-- Feature 4: Mobile access -->
-                <div class="feature-card fade-in-up bg-gradient-to-br from-gray-50 to-white rounded-2xl p-8 border border-gray-200 hover:shadow-xl transition-all duration-300">
-                    <div class="icon-container w-16 h-16 rounded-xl flex items-center justify-center mb-6">
-                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+
+                <!-- Feature 4 -->
+                <div class="bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-shadow border border-gray-100">
+                    <div class="w-16 h-16 bg-amber-100 rounded-xl flex items-center justify-center mb-6">
+                        <svg class="w-8 h-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-3">Gotowe Raporty</h3>
+                    <p class="text-gray-600 leading-relaxed">
+                        Wybierasz daty, pobierasz zestawienie w Excel i po prostu przepisujesz dane do systemu BDO. Oszczędzasz godziny na koniec roku.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- For Who Section -->
+    <section class="py-20 bg-white">
+        <div class="container mx-auto px-4 md:px-6">
+            <div class="max-w-4xl mx-auto">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
+                        Dla kogo jest BDO Helper?
+                    </h2>
+                    <p class="text-lg text-gray-600">
+                        Stworzone z myślą o małych firmach, które nie potrzebują skomplikowanych systemów
+                    </p>
+                </div>
+
+                <div class="grid md:grid-cols-3 gap-6">
+                    <!-- Target 1 -->
+                    <div class="text-center p-6 rounded-xl hover:bg-emerald-50 transition-colors">
+                        <div class="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg class="w-10 h-10 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <h3 class="font-bold text-slate-900 mb-2">Salony fryzjerskie</h3>
+                        <p class="text-sm text-gray-600">Opakowania po farbkach, kosmetykach, ręczniki – wszystko w jednym miejscu</p>
+                    </div>
+
+                    <!-- Target 2 -->
+                    <div class="text-center p-6 rounded-xl hover:bg-blue-50 transition-colors">
+                        <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg class="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/>
+                            </svg>
+                        </div>
+                        <h3 class="font-bold text-slate-900 mb-2">Warsztaty samochodowe</h3>
+                        <p class="text-sm text-gray-600">Oleje, filtry, opakowania – ewidencja na telefonie, zawsze pod ręką</p>
+                    </div>
+
+                    <!-- Target 3 -->
+                    <div class="text-center p-6 rounded-xl hover:bg-purple-50 transition-colors">
+                        <div class="w-20 h-20 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg class="w-10 h-10 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                            </svg>
+                        </div>
+                        <h3 class="font-bold text-slate-900 mb-2">Mały e-commerce</h3>
+                        <p class="text-sm text-gray-600">Kartony, folia stretch, palety – błyskawiczne raporty na koniec roku</p>
+                    </div>
+                </div>
+
+                <!-- Mobile First Badge -->
+                <div class="mt-12 text-center">
+                    <div class="inline-flex items-center space-x-3 bg-gradient-to-r from-emerald-50 to-blue-50 px-6 py-4 rounded-2xl border border-emerald-200">
+                        <svg class="w-8 h-8 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
                         </svg>
+                        <div class="text-left">
+                            <div class="font-bold text-slate-900">Działa idealnie na telefonie</div>
+                            <div class="text-sm text-gray-600">Mobile-First Design – dodawaj wpisy w drodze</div>
+                        </div>
                     </div>
-                    <h3 class="text-xl font-bold text-slate-800 mb-3">Dostęp mobilny</h3>
-                    <p class="text-gray-600 leading-relaxed">
-                        Korzystaj <strong>bezpośrednio z warsztatu lub placu budowy</strong>. Aplikacja działa na telefonie, tablecie i komputerze.
-                    </p>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Advanced Features Section - Detailed functionality explanation -->
-    <section class="py-20 bg-gradient-to-br from-slate-50 via-emerald-50 to-slate-50">
-        <div class="container mx-auto px-4">
-            <!-- Section Header -->
-            <div class="text-center mb-16">
-                <h2 class="text-4xl md:text-5xl font-bold text-slate-800 mb-4">
-                    Funkcjonalności<br/>
-                    <span class="text-emerald-600">stworzone dla Ciebie</span>
+    <!-- Final CTA -->
+    <section class="py-20 bg-gradient-to-br from-emerald-600 to-emerald-500 text-white">
+        <div class="container mx-auto px-4 md:px-6">
+            <div class="max-w-3xl mx-auto text-center">
+                <h2 class="text-3xl md:text-5xl font-bold mb-6">
+                    Zacznij prowadzić BDO<br/>bez stresu już dziś
                 </h2>
-                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-                    Niezależny asystent, który pilnuje Twoich limitów i przygotowuje wszystkie dane. 
-                    Ty tylko przepisujesz gotowe zestawienia do systemu rządowego.
+                <p class="text-lg md:text-xl mb-8 text-emerald-50">
+                    Wersja Beta. Pełny dostęp. Zero zobowiązań.
+                </p>
+                
+                <!-- Price Highlight -->
+                <div class="inline-block bg-white/20 backdrop-blur-sm rounded-2xl px-8 py-6 mb-8 border border-white/30">
+                    <div class="text-6xl font-bold mb-2">0 zł</div>
+                    <div class="text-emerald-50">Kompletnie za darmo w fazie testów</div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <a href="register.html" class="bg-white text-emerald-600 px-8 py-4 rounded-full font-bold text-lg hover:shadow-2xl hover:scale-105 transition-all">
+                        Utwórz konto za darmo
+                    </a>
+                    <a href="/cdn-cgi/l/email-protection#056e6a6b71646e714567616a6d60697560772b7569" class="border-2 border-white text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-white/10 transition-all">
+                        Masz pytania? Napisz
+                    </a>
+                </div>
+
+                <p class="mt-8 text-sm text-emerald-100">
+                    Bez karty kredytowej • Bez ukrytych kosztów • Bez zobowiązań
                 </p>
             </div>
-
-            <!-- Features Grid - 3 columns on desktop, 1 on mobile -->
-            <div class="grid md:grid-cols-3 gap-8 max-w-7xl mx-auto">
-                
-                <!-- Feature 1: Limit Guardian with Progress Bar -->
-                <div class="bg-white rounded-2xl shadow-lg overflow-hidden border-2 border-emerald-100 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2">
-                    <!-- Icon header with gradient background -->
-                    <div class="bg-gradient-to-br from-emerald-500 to-emerald-600 p-6 text-white">
-                        <div class="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mb-4 backdrop-blur-sm">
-                            <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
-                            </svg>
-                        </div>
-                        <h3 class="text-2xl font-bold mb-2">🛡️ Strażnik Limitów</h3>
-                        <p class="text-emerald-100 text-sm">Nigdy więcej niespodzianek z Inspekcją</p>
-                    </div>
-                    
-                    <!-- Content area -->
-                    <div class="p-6">
-                        <p class="text-gray-700 mb-6 leading-relaxed">
-                            Wizualny pasek postępu pokazuje dokładnie, ile z Twojego limitu zwolnienia z ewidencji BDO zostało wykorzystane.
-                        </p>
-                        
-                        <!-- Visual example: Progress bar demonstration -->
-                        <div class="bg-slate-50 rounded-xl p-4 mb-4">
-                            <div class="flex justify-between items-center mb-2">
-                                <span class="text-sm font-semibold text-slate-700">Limit roczny (5 ton)</span>
-                                <span class="text-sm font-bold text-emerald-600">2.8 t / 5 t</span>
-                            </div>
-                            
-                            <!-- Progress bar -->
-                            <div class="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
-                                <div class="bg-gradient-to-r from-emerald-400 to-emerald-600 h-4 rounded-full shadow-inner transition-all duration-500" style="width: 56%">
-                                </div>
-                            </div>
-                            
-                            <div class="flex items-center mt-3 text-xs text-slate-600">
-                                <svg class="w-4 h-4 text-green-500 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                                </svg>
-                                Bezpieczna strefa - zostało 2.2 tony
-                            </div>
-                        </div>
-                        
-                        <!-- Alert example when approaching limit -->
-                        <div class="bg-amber-50 border-2 border-amber-300 rounded-xl p-3 flex items-start space-x-3">
-                            <svg class="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
-                            </svg>
-                            <div>
-                                <p class="text-sm font-semibold text-amber-800">Alert automatyczny</p>
-                                <p class="text-xs text-amber-700">SMS/Email gdy zostanie &lt;500 kg</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Feature 2: Lightning-fast KPO preparation -->
-                <div class="bg-white rounded-2xl shadow-lg overflow-hidden border-2 border-emerald-100 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2">
-                    <!-- Icon header with gradient background -->
-                    <div class="bg-gradient-to-br from-blue-500 to-blue-600 p-6 text-white">
-                        <div class="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mb-4 backdrop-blur-sm">
-                            <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-                            </svg>
-                        </div>
-                        <h3 class="text-2xl font-bold mb-2">⚡ Błyskawiczne KPO</h3>
-                        <p class="text-blue-100 text-sm">15 sekund zamiast 15 minut</p>
-                    </div>
-                    
-                    <!-- Content area -->
-                    <div class="p-6">
-                        <p class="text-gray-700 mb-6 leading-relaxed">
-                            Wypełniasz prosty formularz w telefonie, a aplikacja przygotowuje wszystkie dane do Karty Przekazania Odpadu.
-                        </p>
-                        
-                        <!-- Visual example: Quick data entry -->
-                        <div class="bg-slate-50 rounded-xl p-4 mb-4">
-                            <div class="space-y-3">
-                                <!-- Mock input field -->
-                                <div class="bg-white border-2 border-slate-200 rounded-lg p-3">
-                                    <div class="text-xs text-slate-500 mb-1">Kod odpadu</div>
-                                    <div class="font-semibold text-slate-800">17 01 01 - Odpady betonu</div>
-                                </div>
-                                
-                                <!-- Mock weight input -->
-                                <div class="bg-white border-2 border-slate-200 rounded-lg p-3">
-                                    <div class="text-xs text-slate-500 mb-1">Masa przekazana</div>
-                                    <div class="font-semibold text-slate-800">350 kg</div>
-                                </div>
-                                
-                                <!-- Mock recipient -->
-                                <div class="bg-white border-2 border-slate-200 rounded-lg p-3">
-                                    <div class="text-xs text-slate-500 mb-1">Odbiorca</div>
-                                    <div class="font-semibold text-slate-800">Recykling-Firma Sp. z o.o.</div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Generated output preview -->
-                        <div class="bg-emerald-50 border-2 border-emerald-300 rounded-xl p-3">
-                            <div class="flex items-start space-x-3">
-                                <svg class="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                                </svg>
-                                <div>
-                                    <p class="text-sm font-semibold text-emerald-800">Gotowy "ściągawka"</p>
-                                    <p class="text-xs text-emerald-700">Przepisz do systemu BDO w 15 sek</p>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Time saved badge -->
-                        <div class="mt-4 flex items-center justify-center space-x-2 text-sm text-slate-600">
-                            <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>
-                            <span class="font-medium">Oszczędzasz: <strong class="text-blue-600">90% czasu</strong></span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Feature 3: Annual Report Cheat Sheet -->
-                <div class="bg-white rounded-2xl shadow-lg overflow-hidden border-2 border-emerald-100 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2">
-                    <!-- Icon header with gradient background -->
-                    <div class="bg-gradient-to-br from-purple-500 to-purple-600 p-6 text-white">
-                        <div class="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mb-4 backdrop-blur-sm">
-                            <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
-                            </svg>
-                        </div>
-                        <h3 class="text-2xl font-bold mb-2">📅 Raport Roczny</h3>
-                        <p class="text-purple-100 text-sm">Gotowy przed 15 marca</p>
-                    </div>
-                    
-                    <!-- Content area -->
-                    <div class="p-6">
-                        <p class="text-gray-700 mb-6 leading-relaxed">
-                            Automatyczne podsumowanie całego roku: wszystkie kody odpadów i sumy wag w jednej gotowej tabeli do przepisania.
-                        </p>
-                        
-                        <!-- Visual example: Annual summary table -->
-                        <div class="bg-slate-50 rounded-xl p-4 mb-4 overflow-x-auto">
-                            <div class="text-xs font-semibold text-slate-600 mb-3 flex items-center justify-between">
-                                <span>Zestawienie roczne 2025</span>
-                                <span class="bg-purple-100 text-purple-700 px-2 py-1 rounded-full">Auto</span>
-                            </div>
-                            
-                            <!-- Mock table -->
-                            <table class="w-full text-xs">
-                                <thead>
-                                    <tr class="border-b-2 border-slate-200">
-                                        <th class="text-left py-2 text-slate-600 font-semibold">Kod</th>
-                                        <th class="text-right py-2 text-slate-600 font-semibold">Suma [kg]</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="text-slate-700">
-                                    <tr class="border-b border-slate-100">
-                                        <td class="py-2">17 01 01</td>
-                                        <td class="text-right font-medium">2,450</td>
-                                    </tr>
-                                    <tr class="border-b border-slate-100">
-                                        <td class="py-2">17 01 07</td>
-                                        <td class="text-right font-medium">1,820</td>
-                                    </tr>
-                                    <tr class="border-b border-slate-100">
-                                        <td class="py-2">15 01 02</td>
-                                        <td class="text-right font-medium">680</td>
-                                    </tr>
-                                    <tr class="font-bold bg-slate-100">
-                                        <td class="py-2">RAZEM:</td>
-                                        <td class="text-right text-emerald-700">4,950 kg</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                        
-                        <!-- Export/Copy button example -->
-                        <div class="flex space-x-2">
-                            <button class="flex-1 bg-purple-100 text-purple-700 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-purple-200 transition-colors flex items-center justify-center space-x-2">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/>
-                                </svg>
-                                <span>Kopiuj</span>
-                            </button>
-                            <button class="flex-1 bg-emerald-100 text-emerald-700 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-emerald-200 transition-colors flex items-center justify-center space-x-2">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"/>
-                                </svg>
-                                <span>Excel</span>
-                            </button>
-                        </div>
-                        
-                        <!-- Deadline reminder -->
-                        <div class="mt-4 bg-amber-50 border border-amber-200 rounded-lg p-2 text-center">
-                            <p class="text-xs text-amber-800">
-                                <strong>💡 Przypomnienie:</strong> Auto-reminder 7 dni przed terminem
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- Bottom trust element - emphasizing the "Independent Assistant" model -->
-            <div class="mt-12 max-w-4xl mx-auto">
-                <div class="bg-white rounded-2xl shadow-lg p-8 border-2 border-emerald-100">
-                    <div class="flex flex-col md:flex-row items-center md:items-start space-y-4 md:space-y-0 md:space-x-6">
-                        <!-- Icon -->
-                        <div class="flex-shrink-0">
-                            <div class="w-16 h-16 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-2xl flex items-center justify-center">
-                                <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-                                </svg>
-                            </div>
-                        </div>
-                        
-                        <!-- Content -->
-                        <div class="flex-1 text-center md:text-left">
-                            <h4 class="text-xl font-bold text-slate-800 mb-2">
-                                Model "Niezależnego Asystenta" = Bezpieczeństwo Twoich Danych
-                            </h4>
-                            <p class="text-gray-600 leading-relaxed">
-                                BDO Helper <strong>nie łączy się bezpośrednio z systemem rządowym</strong>. 
-                                Działasz lokalnie, Ty decydujesz kiedy i co przesłać. Aplikacja tylko pomaga 
-                                przygotować poprawne dane i pilnuje limitów. <span class="text-emerald-600 font-semibold">Zero ryzyka, 100% kontroli.</span>
-                            </p>
-                        </div>
-                        
-                        <!-- Trust badge -->
-                        <div class="flex-shrink-0">
-                            <div class="bg-emerald-50 border-2 border-emerald-300 rounded-xl px-4 py-3">
-                                <div class="flex items-center space-x-2">
-                                    <svg class="w-6 h-6 text-emerald-600" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                                    </svg>
-                                    <div class="text-sm">
-                                        <div class="font-bold text-emerald-800">RODO</div>
-                                        <div class="text-xs text-emerald-600">Zgodne</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
     </section>
 
-    <!-- Pain Points vs Solution Section -->
-    <section class="py-20 bg-gradient-to-br from-slate-50 to-gray-100">
-        <div class="container mx-auto px-4">
-            <div class="max-w-4xl mx-auto">
-                <h2 class="text-4xl font-bold text-center text-slate-800 mb-12">
-                    Dlaczego <span class="text-red-600">oficjalny portal</span> to koszmar?
-                </h2>
-                
-                <div class="grid md:grid-cols-2 gap-6">
-                    <!-- Pain point card -->
-                    <div class="bg-red-50 border-2 border-red-200 rounded-xl p-6">
-                        <div class="flex items-start space-x-3">
-                            <svg class="w-6 h-6 text-red-600 flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
-                            </svg>
-                            <div>
-                                <h4 class="font-bold text-slate-800 mb-2">Kody numeryczne zamiast nazw</h4>
-                                <p class="text-gray-700 text-sm">Musisz znać na pamięć setki numerów jak "17 01 07" zamiast po prostu wpisać "gruz".</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Solution card -->
-                    <div class="bg-emerald-50 border-2 border-emerald-200 rounded-xl p-6">
-                        <div class="flex items-start space-x-3">
-                            <svg class="w-6 h-6 text-emerald-600 flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                            </svg>
-                            <div>
-                                <h4 class="font-bold text-slate-800 mb-2">Wyszukiwarka po nazwie</h4>
-                                <p class="text-gray-700 text-sm">Wpisujesz "gruz budowlany" i <strong>od razu widzisz właściwy kod</strong> z opisem.</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Pain point -->
-                    <div class="bg-red-50 border-2 border-red-200 rounded-xl p-6">
-                        <div class="flex items-start space-x-3">
-                            <svg class="w-6 h-6 text-red-600 flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
-                            </svg>
-                            <div>
-                                <h4 class="font-bold text-slate-800 mb-2">Brak alertów o limitach</h4>
-                                <p class="text-gray-700 text-sm">Przekraczasz limit, dostajesz karę 10 000 zł. Dowiadujesz się o tym dopiero z kontroli.</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Solution -->
-                    <div class="bg-emerald-50 border-2 border-emerald-200 rounded-xl p-6">
-                        <div class="flex items-start space-x-3">
-                            <svg class="w-6 h-6 text-emerald-600 flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                            </svg>
-                            <div>
-                                <h4 class="font-bold text-slate-800 mb-2">Automatyczne powiadomienia</h4>
-                                <p class="text-gray-700 text-sm"><strong>Ostrzeżenie SMS/email</strong> gdy zbliżasz się do limitu - masz czas na reakcję.</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Pain point -->
-                    <div class="bg-red-50 border-2 border-red-200 rounded-xl p-6">
-                        <div class="flex items-start space-x-3">
-                            <svg class="w-6 h-6 text-red-600 flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
-                            </svg>
-                            <div>
-                                <h4 class="font-bold text-slate-800 mb-2">Raport zajmuje godziny</h4>
-                                <p class="text-gray-700 text-sm">Formularz pełen błędów walidacji. Tracisz 2-3 godziny na jedno zgłoszenie.</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Solution -->
-                    <div class="bg-emerald-50 border-2 border-emerald-200 rounded-xl p-6">
-                        <div class="flex items-start space-x-3">
-                            <svg class="w-6 h-6 text-emerald-600 flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                            </svg>
-                            <div>
-                                <h4 class="font-bold text-slate-800 mb-2">Raport w 5 minut</h4>
-                                <p class="text-gray-700 text-sm">Wypełniasz prosty formularz, <strong>generujesz gotowy plik</strong> i wklejasz do portalu.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Pricing / Smoke Test Section -->
-    <section id="pricing" class="py-20 bg-white">
-        <div class="container mx-auto px-4">
-            <div class="text-center mb-12">
-                <h2 class="text-4xl md:text-5xl font-bold text-slate-800 mb-4">
-                    Prosty cennik dla<br/>
-                    <span class="text-emerald-600">małych firm</span>
-                </h2>
-                <p class="text-xl text-gray-600">
-                    Bez ukrytych kosztów. Bez zobowiązań. Anuluj w każdej chwili.
-                </p>
-            </div>
-            
-            <!-- Pricing Card -->
-            <div class="max-w-md mx-auto">
-                <div class="bg-gradient-to-br from-emerald-50 to-blue-50 rounded-2xl shadow-2xl overflow-hidden border-2 border-emerald-200">
-                    <!-- Popular badge -->
-                    <div class="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white text-center py-3 font-semibold">
-                        🔥 Najbardziej popularny
-                    </div>
-                    
-                    <div class="p-8">
-                        <h3 class="text-2xl font-bold text-slate-800 mb-2">Plan Starter</h3>
-                        <div class="flex items-baseline mb-6">
-                            <span class="text-5xl font-bold text-slate-800">49 zł</span>
-                            <span class="text-gray-600 ml-2">/miesiąc</span>
-                        </div>
-                        
-                        <!-- Features list -->
-                        <ul class="space-y-4 mb-8">
-                            <li class="flex items-start space-x-3">
-                                <svg class="w-6 h-6 text-emerald-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                                </svg>
-                                <span class="text-gray-700"><strong>Nielimitowane wyszukiwania</strong> kodów odpadów</span>
-                            </li>
-                            <li class="flex items-start space-x-3">
-                                <svg class="w-6 h-6 text-emerald-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                                </svg>
-                                <span class="text-gray-700"><strong>10 raportów miesięcznie</strong> (wystarczy dla 90% firm)</span>
-                            </li>
-                            <li class="flex items-start space-x-3">
-                                <svg class="w-6 h-6 text-emerald-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                                </svg>
-                                <span class="text-gray-700"><strong>Alerty SMS i email</strong> o zbliżających się limitach</span>
-                            </li>
-                            <li class="flex items-start space-x-3">
-                                <svg class="w-6 h-6 text-emerald-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                                </svg>
-                                <span class="text-gray-700"><strong>Dostęp mobilny</strong> na wszystkich urządzeniach</span>
-                            </li>
-                            <li class="flex items-start space-x-3">
-                                <svg class="w-6 h-6 text-emerald-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                                </svg>
-                                <span class="text-gray-700"><strong>Wsparcie email</strong> w 24h</span>
-                            </li>
-                        </ul>
-                        
-                        <!-- CTA Button for conversion -->
-                        <button onclick="openModal()" class="w-full btn-primary text-white px-8 py-4 rounded-full font-bold text-lg">
-                            Sprawdź dostępność
-                        </button>
-                        
-                        <p class="text-center text-sm text-gray-600 mt-4">
-                            💳 Bez karty kredytowej. 14 dni za darmo.
-                        </p>
-                    </div>
-                </div>
-                
-                <!-- Trust elements below pricing -->
-                <div class="mt-8 text-center">
-                    <p class="text-gray-600 mb-4">Zaufało nam już:</p>
-                    <div class="flex justify-center items-center space-x-8 text-gray-400">
-                        <div class="font-semibold">🔧 Warsztaty</div>
-                        <div class="font-semibold">💅 Salony</div>
-                        <div class="font-semibold">🏗️ Budowlanka</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Final CTA Section -->
-    <section class="py-16 bg-gradient-to-r from-emerald-600 to-blue-600 text-white">
-        <div class="container mx-auto px-4 text-center">
-            <h2 class="text-3xl md:text-4xl font-bold mb-4">
-                Gotowy na prostsze zarządzanie odpadami?
-            </h2>
-            <p class="text-xl mb-8 opacity-90">
-                Dołącz do setek przedsiębiorców, którzy oszczędzają czas i unikają kar.
-            </p>
-            <button onclick="openModal()" class="bg-white text-emerald-600 px-10 py-4 rounded-full font-bold text-lg hover:bg-gray-100 transition-all shadow-lg">
-                Zacznij bezpłatny okres próbny
-            </button>
-        </div>
-    </section>
-    <!-- FAQ Section - Insert before footer -->
-<section class="py-20 bg-white">
-    <div class="container mx-auto px-4">
-        <!-- Section Header -->
-        <div class="text-center mb-16">
-            <h2 class="text-4xl md:text-5xl font-bold text-slate-800 mb-4">
-                Najczęściej zadawane<br/>
-                <span class="text-emerald-600">pytania</span>
-            </h2>
-            <p class="text-xl text-gray-600 max-w-2xl mx-auto">
-                Wszystko, co musisz wiedzieć o zarządzaniu odpadami i unikaniu kar
-            </p>
-        </div>
-
-        <!-- FAQ Items Container -->
-        <div class="max-w-4xl mx-auto space-y-4">
-            
-            <!-- FAQ Item 1: Limits verification -->
-            <div class="bg-gradient-to-br from-gray-50 to-white rounded-2xl border-2 border-emerald-100 overflow-hidden hover:shadow-lg transition-all duration-300">
-                <button 
-                    onclick="toggleFAQ('faq1')" 
-                    class="w-full px-6 md:px-8 py-6 flex items-center justify-between text-left group"
-                    aria-expanded="false"
-                    aria-controls="faq1">
-                    <div class="flex items-start space-x-4 flex-1">
-                        <!-- Icon -->
-                        <div class="flex-shrink-0 w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center group-hover:bg-emerald-200 transition-colors">
-                            <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-                            </svg>
-                        </div>
-                        <!-- Question text -->
-                        <h3 class="text-lg md:text-xl font-bold text-slate-800 pr-4">
-                            Jak sprawdzić limity BDO 2026?
-                        </h3>
-                    </div>
-                    <!-- Chevron icon -->
-                    <svg id="chevron-faq1" class="w-6 h-6 text-emerald-600 transform transition-transform duration-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                    </svg>
-                </button>
-                
-                <!-- Answer (hidden by default) -->
-                <div id="faq1" class="hidden px-6 md:px-8 pb-6">
-                    <div class="pl-0 md:pl-14 text-gray-700 leading-relaxed">
-                        <p>
-                            Limity zależą od kodów odpadów (np. <strong class="text-slate-800">5000kg rocznie dla opakowań z papieru</strong>). 
-                            Nasz system automatycznie sumuje wpisy i wysyła alerty przed przekroczeniem progu.
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- FAQ Item 2: Penalties for missing reports -->
-            <div class="bg-gradient-to-br from-gray-50 to-white rounded-2xl border-2 border-emerald-100 overflow-hidden hover:shadow-lg transition-all duration-300">
-                <button 
-                    onclick="toggleFAQ('faq2')" 
-                    class="w-full px-6 md:px-8 py-6 flex items-center justify-between text-left group"
-                    aria-expanded="false"
-                    aria-controls="faq2">
-                    <div class="flex items-start space-x-4 flex-1">
-                        <!-- Icon -->
-                        <div class="flex-shrink-0 w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center group-hover:bg-red-200 transition-colors">
-                            <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                            </svg>
-                        </div>
-                        <!-- Question text -->
-                        <h3 class="text-lg md:text-xl font-bold text-slate-800 pr-4">
-                            Ile kosztuje kara za brak sprawozdania BDO?
-                        </h3>
-                    </div>
-                    <!-- Chevron icon -->
-                    <svg id="chevron-faq2" class="w-6 h-6 text-emerald-600 transform transition-transform duration-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                    </svg>
-                </button>
-                
-                <!-- Answer (hidden by default) -->
-                <div id="faq2" class="hidden px-6 md:px-8 pb-6">
-                    <div class="pl-0 md:pl-14 text-gray-700 leading-relaxed">
-                        <p>
-                            Administracyjne kary pieniężne nakładane przez WIOŚ mogą wynosić 
-                            <strong class="text-red-600">od 5 000 zł do nawet 1 000 000 zł</strong>. 
-                            Pomagamy ich uniknąć dzięki terminowym przypomnieniom.
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- FAQ Item 3: Quick KPO generation -->
-            <div class="bg-gradient-to-br from-gray-50 to-white rounded-2xl border-2 border-emerald-100 overflow-hidden hover:shadow-lg transition-all duration-300">
-                <button 
-                    onclick="toggleFAQ('faq3')" 
-                    class="w-full px-6 md:px-8 py-6 flex items-center justify-between text-left group"
-                    aria-expanded="false"
-                    aria-controls="faq3">
-                    <div class="flex items-start space-x-4 flex-1">
-                        <!-- Icon -->
-                        <div class="flex-shrink-0 w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center group-hover:bg-blue-200 transition-colors">
-                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-                            </svg>
-                        </div>
-                        <!-- Question text -->
-                        <h3 class="text-lg md:text-xl font-bold text-slate-800 pr-4">
-                            Jak najszybciej wystawić KPO?
-                        </h3>
-                    </div>
-                    <!-- Chevron icon -->
-                    <svg id="chevron-faq3" class="w-6 h-6 text-emerald-600 transform transition-transform duration-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                    </svg>
-                </button>
-                
-                <!-- Answer (hidden by default) -->
-                <div id="faq3" class="hidden px-6 md:px-8 pb-6">
-                    <div class="pl-0 md:pl-14 text-gray-700 leading-relaxed">
-                        <p>
-                            Zamiast logować się do e-PUAP przy każdym wywozie, skorzystaj z naszego asystenta, 
-                            który przygotuje wszystkie dane do KPO <strong class="text-blue-600">w 15 sekund na Twoim telefonie</strong>.
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- FAQ Item 4: Independence from government systems -->
-            <div class="bg-gradient-to-br from-gray-50 to-white rounded-2xl border-2 border-emerald-100 overflow-hidden hover:shadow-lg transition-all duration-300">
-                <button 
-                    onclick="toggleFAQ('faq4')" 
-                    class="w-full px-6 md:px-8 py-6 flex items-center justify-between text-left group"
-                    aria-expanded="false"
-                    aria-controls="faq4">
-                    <div class="flex items-start space-x-4 flex-1">
-                        <!-- Icon -->
-                        <div class="flex-shrink-0 w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center group-hover:bg-purple-200 transition-colors">
-                            <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>
-                        </div>
-                        <!-- Question text -->
-                        <h3 class="text-lg md:text-xl font-bold text-slate-800 pr-4">
-                            Czy aplikacja jest powiązana z ministerstwem?
-                        </h3>
-                    </div>
-                    <!-- Chevron icon -->
-                    <svg id="chevron-faq4" class="w-6 h-6 text-emerald-600 transform transition-transform duration-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                    </svg>
-                </button>
-                
-                <!-- Answer (hidden by default) -->
-                <div id="faq4" class="hidden px-6 md:px-8 pb-6">
-                    <div class="pl-0 md:pl-14 text-gray-700 leading-relaxed">
-                        <p>
-                            <strong class="text-slate-800">BDO Helper to niezależny asystent ewidencji pomocniczej</strong>. 
-                            Działamy zawsze, nawet gdy oficjalne systemy rządowe mają awarię lub przerwę serwisową.
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-
-        <!-- Bottom CTA after FAQ -->
-        <div class="mt-12 text-center">
-            <p class="text-gray-600 mb-6">Masz więcej pytań? Chętnie pomożemy!</p>
-            <a href="#pricing" class="inline-block bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-8 py-4 rounded-full font-semibold text-lg hover:shadow-xl transition-all hover:-translate-y-1">
-                Sprawdź dostępność
-            </a>
-        </div>
-    </div>
-</section>
-
-<!-- FAQ JavaScript - Add this script at the end of your existing JavaScript section -->
-<script>
-    // English comment: Toggle FAQ accordion item - shows/hides answer and rotates chevron icon
-    function toggleFAQ(faqId) {
-        const faqContent = document.getElementById(faqId);
-        const chevron = document.getElementById('chevron-' + faqId);
-        const button = faqContent.previousElementSibling;
-        
-        // English comment: Check if currently open
-        const isOpen = !faqContent.classList.contains('hidden');
-        
-        if (isOpen) {
-            // English comment: Close this FAQ item
-            faqContent.classList.add('hidden');
-            chevron.classList.remove('rotate-180');
-            button.setAttribute('aria-expanded', 'false');
-        } else {
-            // English comment: Open this FAQ item
-            faqContent.classList.remove('hidden');
-            chevron.classList.add('rotate-180');
-            button.setAttribute('aria-expanded', 'true');
-        }
-    }
-    
-    // English comment: Optional - Auto-open first FAQ item on page load for better UX
-    // Uncomment the line below if you want the first question to be open by default
-    // toggleFAQ('faq1');
-</script>
     <!-- Footer -->
     <footer class="bg-slate-900 text-gray-400 py-12">
-        <div class="container mx-auto px-4">
-            <div class="grid md:grid-cols-4 gap-8 mb-8">
-                <!-- Company info -->
-                <div>
-                    <div class="flex items-center space-x-2 mb-4">
-                        <svg class="w-6 h-6 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                        </svg>
-                        <span class="text-xl font-bold text-white">BDO Helper</span>
+        <div class="container mx-auto px-4 md:px-6">
+            <div class="max-w-4xl mx-auto">
+                <div class="grid md:grid-cols-3 gap-8 mb-8">
+                    <div>
+                        <div class="flex items-center space-x-2 mb-4">
+                            <svg class="w-6 h-6 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                            <span class="text-white font-bold">BDO Helper</span>
+                        </div>
+                        <p class="text-sm">Ewidencja odpadów bez stresu</p>
                     </div>
-                    <p class="text-sm">
-                        Upraszczamy polski system BDO dla małych i średnich przedsiębiorstw.
-                    </p>
+
+                    <div>
+                        <h3 class="text-white font-semibold mb-3">Aplikacja</h3>
+                        <ul class="space-y-2 text-sm">
+                            <li><a href="register.html" class="hover:text-emerald-400 transition-colors">Rejestracja</a></li>
+                            <li><a href="login.html" class="hover:text-emerald-400 transition-colors">Logowanie</a></li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h3 class="text-white font-semibold mb-3">Kontakt</h3>
+                        <ul class="space-y-2 text-sm">
+                            <li>
+                                <a href="/cdn-cgi/l/email-protection#bed5d1d0cadfd5cafedcdad1d6dbd2cedbcc90ced2" class="hover:text-emerald-400 transition-colors">
+                                    <span class="__cf_email__" data-cfemail="3f5450514b5e544b7f5d5b50575a534f5a4d114f53">[email&#160;protected]</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
-                
-                <!-- Links columns -->
-                <div>
-                    <h4 class="text-white font-semibold mb-4">Produkt</h4>
-                    <ul class="space-y-2 text-sm">
-                        <li><a href="#features" class="hover:text-emerald-400 transition-colors">Funkcje</a></li>
-                        <li><a href="#pricing" class="hover:text-emerald-400 transition-colors">Cennik</a></li>
-                        <li><a href="#" class="hover:text-emerald-400 transition-colors">FAQ</a></li>
-                        <li><a href="login.html" class="hover:text-emerald-400 transition-colors">Panel użytkownika</a></li>
-                    </ul>
+
+                <div class="border-t border-gray-800 pt-8 text-center text-sm">
+                    <p>&copy; 2026 BDO Helper. Wersja Beta.</p>
                 </div>
-                
-                <div>
-                    <h4 class="text-white font-semibold mb-4">Firma</h4>
-                    <ul class="space-y-2 text-sm">
-                        <li><a href="#" class="hover:text-emerald-400 transition-colors">O nas</a></li>
-                        <li><a href="#" class="hover:text-emerald-400 transition-colors">Blog</a></li>
-                        <li><a href="#" class="hover:text-emerald-400 transition-colors">Kontakt</a></li>
-                    </ul>
-                </div>
-                
-                <div>
-                    <h4 class="text-white font-semibold mb-4">Prawne</h4>
-                    <ul class="space-y-2 text-sm">
-                        <li><a href="#" class="hover:text-emerald-400 transition-colors">Regulamin</a></li>
-                        <li><a href="#" class="hover:text-emerald-400 transition-colors">Polityka prywatności</a></li>
-                        <li><a href="#" class="hover:text-emerald-400 transition-colors">RODO</a></li>
-                    </ul>
-                </div>
-            </div>
-            
-            <!-- Copyright -->
-            <div class="border-t border-gray-800 pt-8 text-center text-sm">
-                <p>&copy; 2026 BDO Helper. Wszystkie prawa zastrzeżone.</p>
             </div>
         </div>
     </footer>
 
-    <!-- Modal for email collection (Conversion Goal) -->
-    <div id="emailModal" class="modal">
-        <div class="modal-content">
-            <!-- Modal header -->
-            <div class="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white p-6 rounded-t-2xl">
-                <div class="flex justify-between items-center">
-                    <h3 class="text-2xl font-bold">Sprawdź dostępność</h3>
-                    <button onclick="closeModal()" class="text-white hover:text-gray-200 text-3xl leading-none">&times;</button>
-                </div>
-                <p class="mt-2 opacity-90">Zostaw swój email - odpiszemy w 24h!</p>
-            </div>
-            
-            <!-- Modal body -->
-            <div class="p-8">
-                <form id="emailForm" onsubmit="handleSubmit(event)">
-                    <div class="mb-6">
-                        <label for="userEmail" class="block text-gray-700 font-semibold mb-2">Twój email</label>
-                        <input 
-                            type="email" 
-                            id="userEmail" 
-                            name="email" 
-                            required 
-                            placeholder="jan.kowalski@firma.pl"
-                            class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-emerald-500 focus:outline-none text-gray-800"
-                        >
-                    </div>
-                    
-                    <div class="mb-6">
-                        <label for="companyType" class="block text-gray-700 font-semibold mb-2">Rodzaj działalności (opcjonalnie)</label>
-                        <select 
-                            id="companyType" 
-                            name="companyType"
-                            class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-emerald-500 focus:outline-none text-gray-800"
-                        >
-                            <option value="">Wybierz...</option>
-                            <option value="warsztat">Warsztat samochodowy</option>
-                            <option value="salon">Salon kosmetyczny/fryzjerski</option>
-                            <option value="budowlanka">Firma budowlana</option>
-                            <option value="inne">Inne</option>
-                        </select>
-                    </div>
-                    
-                    <button type="submit" class="w-full btn-primary text-white px-6 py-4 rounded-full font-bold text-lg">
-                        Wyślij zgłoszenie
-                    </button>
-                    
-                    <p class="text-xs text-gray-500 mt-4 text-center">
-                        Klikając "Wyślij zgłoszenie" akceptujesz naszą politykę prywatności
-                    </p>
-                </form>
-                
-                <!-- Success message (hidden by default) -->
-                <div id="successMessage" class="hidden text-center">
-                    <div class="mb-4">
-                        <svg class="w-20 h-20 text-emerald-500 mx-auto" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                        </svg>
-                    </div>
-                    <h3 class="text-2xl font-bold text-slate-800 mb-2">Dziękujemy!</h3>
-                    <p class="text-gray-600 mb-6">
-                        Twoje zgłoszenie zostało przyjęte. Skontaktujemy się z Tobą w ciągu 24 godzin.
-                    </p>
-                    <a href="register.html" class="inline-block bg-emerald-600 text-white px-8 py-3 rounded-full font-semibold hover:bg-emerald-700 transition-colors mb-3">
-                        Utwórz konto teraz
-                    </a>
-                    <button onclick="closeModal()" class="block w-full text-gray-600 hover:text-gray-800 text-sm">
-                        Zamknij
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- JavaScript for interactivity -->
+    <!-- English comment: Dark mode toggle script -->
     <script>
-        // English comment: Supabase configuration - replace with your actual credentials
-        const SUPABASE_URL = 'REPLACE_ME_URL';
-        const SUPABASE_KEY = 'REPLACE_ME_KEY';
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-        // Modal functions
-        function openModal() {
-            document.getElementById('emailModal').style.display = 'block';
-            document.body.style.overflow = 'hidden'; // Prevent background scrolling
-        }
+        // English comment: Check for saved dark mode preference or default to DARK mode
+        const darkMode = localStorage.getItem('darkMode');
+        const sunIcon = document.getElementById('sunIcon');
+        const moonIcon = document.getElementById('moonIcon');
         
-        function closeModal() {
-            document.getElementById('emailModal').style.display = 'none';
-            document.body.style.overflow = 'auto';
-            // Reset form if needed
-            document.getElementById('emailForm').reset();
-            document.getElementById('emailForm').classList.remove('hidden');
-            document.getElementById('successMessage').classList.add('hidden');
-        }
-        
-        // Close modal when clicking outside
-        window.onclick = function(event) {
-            const modal = document.getElementById('emailModal');
-            if (event.target === modal) {
-                closeModal();
+        // English comment: Apply saved preference on page load, default to dark mode
+        if (darkMode === 'disabled') {
+            // English comment: User explicitly chose light mode
+            document.body.classList.remove('dark-mode');
+            sunIcon.classList.add('hidden');
+            moonIcon.classList.remove('hidden');
+        } else {
+            // English comment: Default to dark mode (first visit or user prefers dark)
+            document.body.classList.add('dark-mode');
+            sunIcon.classList.remove('hidden');
+            moonIcon.classList.add('hidden');
+            if (!darkMode) {
+                // English comment: Set default preference on first visit
+                localStorage.setItem('darkMode', 'enabled');
             }
         }
         
-        // English comment: Handle form submission with Supabase database integration
-        async function handleSubmit(event) {
-            event.preventDefault();
+        // English comment: Toggle dark mode
+        function toggleDarkMode() {
+            const isDarkMode = document.body.classList.toggle('dark-mode');
             
-            const emailInput = document.getElementById('userEmail').value;
-            const companyTypeInput = document.getElementById('companyType').value;
-            
-            // English comment: We only send email and company_type. 
-            // ID and Created_at are handled automatically by the database.
-            const { data, error } = await supabaseClient
-                .from('leads')
-                .insert([
-                    { 
-                        email: emailInput, 
-                        company_type: companyTypeInput 
-                    }
-                ]);
-
-            if (error) {
-                console.error('Database Error:', error);
-                // English comment: Alerting user if RLS is still enabled or table name is wrong
-                alert('Błąd zapisu: ' + error.message);
+            // English comment: Update icons
+            if (isDarkMode) {
+                sunIcon.classList.remove('hidden');
+                moonIcon.classList.add('hidden');
+                localStorage.setItem('darkMode', 'enabled');
             } else {
-                console.log('Success! Initial lead stored.');
-                // English comment: Also log to browser console for debugging/analytics backup
-                console.log('Lead data:', { email: emailInput, companyType: companyTypeInput });
-                
-                // English comment: Hide form and show success message
-                document.getElementById('emailForm').classList.add('hidden');
-                document.getElementById('successMessage').classList.remove('hidden');
-                
-                setTimeout(() => {
-                    window.location.href = 'register.html';
-                }, 3000);
+                sunIcon.classList.add('hidden');
+                moonIcon.classList.remove('hidden');
+                localStorage.setItem('darkMode', 'disabled');
             }
         }
-        
-        // Smooth scroll for anchor links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }
-            });
-        });
-        
-        // Add scroll-triggered animations (optional enhancement)
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        };
-        
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.style.opacity = '1';
-                    entry.target.style.transform = 'translateY(0)';
-                }
-            });
-        }, observerOptions);
-        
-        // Observe feature cards for scroll animations
-        document.querySelectorAll('.feature-card').forEach(card => {
-            card.style.opacity = '0';
-            card.style.transform = 'translateY(30px)';
-            observer.observe(card);
-        });
-        
-        // Sticky header shadow on scroll
-        window.addEventListener('scroll', () => {
-            const header = document.querySelector('header');
-            if (window.scrollY > 50) {
-                header.classList.add('shadow-lg');
-            } else {
-                header.classList.remove('shadow-lg');
-            }
-        });
     </script>
+
 </body>
 </html>

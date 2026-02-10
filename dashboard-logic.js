@@ -453,72 +453,58 @@ function renderRecentEntries() {
 
 /**
  * English comment: Populate waste code search in add entry modal
- * Uses select with live search/filter functionality
+ * Rebuilds the select options based on cache
  */
 async function populateWasteCodeSearch() {
-    const select = document.getElementById('wasteCode');
     const searchInput = document.getElementById('wasteCodeSearch');
     
-    if (!select) return;
+    // English comment: Initial render of all codes
+    renderWasteOptions(wasteCodesCache);
 
-    // English comment: Clear existing options
-    select.innerHTML = '<option value="">Wybierz kod odpadu...</option>';
-
-    // English comment: Add all waste codes as options
-    wasteCodesCache.forEach(code => {
-        const option = document.createElement('option');
-        option.value = code.waste_code;
-        option.textContent = `${code.waste_code} - ${code.name}`;
-        option.dataset.name = code.name.toLowerCase();
-        option.dataset.code = code.waste_code.toLowerCase();
-        select.appendChild(option);
-    });
-
-    // English comment: Add search functionality if search input exists
+    // English comment: Add search functionality with DOM rebuild for mobile support
     if (searchInput) {
         searchInput.addEventListener('input', function(e) {
-            filterWasteCodeOptions(e.target.value);
+            const term = e.target.value.toLowerCase().trim();
+            
+            // English comment: Filter the cache
+            const filtered = wasteCodesCache.filter(code => 
+                code.waste_code.toLowerCase().includes(term) || 
+                code.name.toLowerCase().includes(term)
+            );
+            
+            // English comment: Re-render only matching options
+            renderWasteOptions(filtered);
         });
     }
 
-    console.log(`✅ Populated ${wasteCodesCache.length} waste codes in search`);
+    console.log(`✅ Search initialized for ${wasteCodesCache.length} codes`);
 }
 
 /**
- * English comment: Filter waste code options based on search term
- * @param {string} searchTerm - User input to filter by
+ * English comment: Helper to physically render option elements
+ * This is crucial for mobile compatibility as display:none fails on mobile selects
  */
-function filterWasteCodeOptions(searchTerm) {
+function renderWasteOptions(codes) {
     const select = document.getElementById('wasteCode');
     if (!select) return;
 
-    const term = searchTerm.toLowerCase().trim();
-    const options = select.querySelectorAll('option');
+    // English comment: Clear existing options completely
+    select.innerHTML = '<option value="">Wybierz kod odpadu...</option>';
 
-    // English comment: Show all if search is empty
-    if (!term) {
-        options.forEach(option => {
-            option.style.display = '';
-        });
+    if (codes.length === 0) {
+        const option = document.createElement('option');
+        option.disabled = true;
+        option.textContent = "Nie znaleziono pasujących kodów";
+        select.appendChild(option);
         return;
     }
 
-    // English comment: Filter options
-    options.forEach(option => {
-        if (option.value === '') {
-            option.style.display = ''; // Always show placeholder
-            return;
-        }
-
-        const code = option.dataset.code || '';
-        const name = option.dataset.name || '';
-
-        // English comment: Show if matches code or name
-        if (code.includes(term) || name.includes(term)) {
-            option.style.display = '';
-        } else {
-            option.style.display = 'none';
-        }
+    // English comment: Create and append new option elements
+    codes.forEach(code => {
+        const option = document.createElement('option');
+        option.value = code.waste_code;
+        option.textContent = `${code.waste_code} - ${code.name}`;
+        select.appendChild(option);
     });
 }
 

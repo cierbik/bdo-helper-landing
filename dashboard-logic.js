@@ -572,7 +572,7 @@ async function handleAddEntry(event) {
 }
 
 /**
- * English comment: Delete waste entry by ID
+ * English comment: Delete waste entry by ID with modern confirmation dialog
  * @param {string} entryId - UUID of the entry to delete
  */
 async function deleteEntry(entryId) {
@@ -581,8 +581,22 @@ async function deleteEntry(entryId) {
         return;
     }
 
-    // English comment: Confirm deletion
-    if (!confirm('Czy na pewno chcesz usunąć ten wpis?')) {
+    // English comment: Modern SweetAlert2 confirmation dialog
+    const result = await Swal.fire({
+        title: 'Jesteś pewien?',
+        text: "Tego wpisu nie da się odzyskać!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#059669', // emerald-600
+        cancelButtonColor: '#ef4444',  // red-500
+        confirmButtonText: 'Tak, usuń!',
+        cancelButtonText: 'Anuluj',
+        background: '#ffffff',
+        borderRadius: '15px'
+    });
+
+    // English comment: If user cancelled, stop the function
+    if (!result.isConfirmed) {
         return;
     }
 
@@ -600,7 +614,8 @@ async function deleteEntry(entryId) {
 
         console.log('✅ Entry deleted successfully');
 
-        // English comment: CRITICAL - Clear all containers before re-rendering
+        // English comment: CRITICAL - Clear all containers before re-rendering 
+        // to ensure that groups with 0kg weight actually disappear
         clearAllContainers();
 
         // English comment: Re-fetch ALL data from database (full refresh)
@@ -609,7 +624,7 @@ async function deleteEntry(entryId) {
         // English comment: Re-render entire dashboard with fresh data
         renderDashboard();
 
-        // English comment: Show success message
+        // English comment: Show success message using the modern toast
         showSuccess('Wpis usunięty pomyślnie!');
 
     } catch (error) {
@@ -719,21 +734,45 @@ function showLoading(show) {
     }
 }
 
+// ============================================================================
+// MODERNISED UI HELPERS (Toast & SweetAlert)
+// ============================================================================
+
+// English comment: Configure a reusable Toast notification object
+const Toast = Swal.mixin({
+    toast: true,
+    position: 'top-end',
+    showConfirmButton: false,
+    timer: 3000,
+    timerProgressBar: true,
+    didOpen: (toast) => {
+        toast.addEventListener('mouseenter', Swal.stopTimer)
+        toast.addEventListener('mouseleave', Swal.resumeTimer)
+    }
+});
+
 /**
- * English comment: Show error message
+ * English comment: Show a beautiful success toast
  */
-function showError(message) {
-    console.error('❌ Error:', message);
-    alert('Błąd: ' + message);
+function showSuccess(message) {
+    Toast.fire({
+        icon: 'success',
+        title: message,
+        background: '#ecfdf5', // emerald-50
+        iconColor: '#059669', // emerald-600
+    });
 }
 
 /**
- * English comment: Show success message
+ * English comment: Show a beautiful error toast
  */
-function showSuccess(message) {
-    console.log('✅ Success:', message);
-    // English comment: Could be replaced with toast notification
-    alert(message);
+function showError(message) {
+    Toast.fire({
+        icon: 'error',
+        title: 'Błąd!',
+        text: message,
+        background: '#fef2f2', // red-50
+    });
 }
 
 // ============================================================================

@@ -239,6 +239,9 @@ function renderDashboard() {
 
     // English comment: Render dynamic limit cards
     renderLimitCards(aggregatedData);
+
+    // English comment: Render recent entries table
+    renderRecentEntries();
 }
 
 /**
@@ -382,17 +385,79 @@ function renderLimitCards(aggregatedData) {
     }
 }
 
+/**
+ * English comment: Render recent entries table with delete buttons
+ * Shows ALL entries sorted by date (not limited to 10)
+ */
+function renderRecentEntries() {
+    const tableBody = document.getElementById('recentEntriesTable');
+    if (!tableBody) return;
+
+    // English comment: Show ALL entries (already sorted by date desc from query)
+    const allEntries = userEntriesCache;
+
+    if (allEntries.length === 0) {
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="5" class="text-center py-8 text-gray-500 text-sm">
+                    Brak wpisów. Dodaj pierwszy wpis!
+                </td>
+            </tr>
+        `;
+        return;
+    }
+
+    // English comment: Generate table rows for ALL entries
+    const rowsHTML = allEntries.map(entry => {
+        const date = new Date(entry.entry_date).toLocaleDateString('pl-PL');
+        const codeInfo = wasteCodesCache.find(c => c.waste_code === entry.waste_code);
+        const codeName = codeInfo ? codeInfo.name : 'Nieznany kod';
+
+        return `
+            <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                <td class="py-3 px-2 text-xs md:text-sm text-gray-700">${date}</td>
+                <td class="py-3 px-2 text-xs md:text-sm font-medium text-slate-800">
+                    ${entry.waste_code}
+                    <div class="text-[10px] text-gray-500 md:hidden">${codeName}</div>
+                </td>
+                <td class="py-3 px-2 text-xs md:text-sm text-gray-600 hidden md:table-cell">${codeName}</td>
+                <td class="py-3 px-2 text-xs md:text-sm text-right font-semibold text-emerald-700">${entry.weight_kg} kg</td>
+                <td class="py-3 px-2 text-right">
+                    <button 
+                        onclick="deleteEntry('${entry.id}')" 
+                        class="text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-lg transition-colors"
+                        title="Usuń wpis">
+                        <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                        </svg>
+                    </button>
+                </td>
+            </tr>
+        `;
+    }).join('');
+
+    tableBody.innerHTML = rowsHTML;
+    
+    // English comment: Update entry count display
+    const entryCountEl = document.getElementById('entryCount');
+    if (entryCountEl) {
+        entryCountEl.textContent = allEntries.length;
+    }
+    
+    console.log(`✅ Rendered ${allEntries.length} entries in history table`);
+}
+
 // ============================================================================
 // WASTE CODE SEARCH
 // ============================================================================
 
 /**
  * English comment: Populate waste code search in add entry modal
- * Uses datalist for native autocomplete functionality
+ * Uses select with live search/filter functionality
  */
 async function populateWasteCodeSearch() {
     const select = document.getElementById('wasteCode');
-    const datalist = document.getElementById('wasteCodeDatalist');
+    const searchInput = document.getElementById('wasteCodeSearch');
     
     if (!select) return;
 
@@ -404,16 +469,15 @@ async function populateWasteCodeSearch() {
         const option = document.createElement('option');
         option.value = code.waste_code;
         option.textContent = `${code.waste_code} - ${code.name}`;
+        option.dataset.name = code.name.toLowerCase();
+        option.dataset.code = code.waste_code.toLowerCase();
         select.appendChild(option);
     });
 
-    // English comment: If using datalist approach, populate it as well
-    if (datalist) {
-        datalist.innerHTML = '';
-        wasteCodesCache.forEach(code => {
-            const option = document.createElement('option');
-            option.value = `${code.waste_code} - ${code.name}`;
-            datalist.appendChild(option);
+    // English comment: Add search functionality if search input exists
+    if (searchInput) {
+        searchInput.addEventListener('input', function(e) {
+            filterWasteCodeOptions(e.target.value);
         });
     }
 
@@ -421,18 +485,41 @@ async function populateWasteCodeSearch() {
 }
 
 /**
- * English comment: Filter waste codes based on search input
- * Can be used for custom search implementation
+ * English comment: Filter waste code options based on search term
+ * @param {string} searchTerm - User input to filter by
  */
-function filterWasteCodes(searchTerm) {
-    if (!searchTerm) return wasteCodesCache;
+function filterWasteCodeOptions(searchTerm) {
+    const select = document.getElementById('wasteCode');
+    if (!select) return;
 
-    const term = searchTerm.toLowerCase();
+    const term = searchTerm.toLowerCase().trim();
+    const options = select.querySelectorAll('option');
 
-    return wasteCodesCache.filter(code => 
-        code.waste_code.toLowerCase().includes(term) ||
-        code.name.toLowerCase().includes(term)
-    );
+    // English comment: Show all if search is empty
+    if (!term) {
+        options.forEach(option => {
+            option.style.display = '';
+        });
+        return;
+    }
+
+    // English comment: Filter options
+    options.forEach(option => {
+        if (option.value === '') {
+            option.style.display = ''; // Always show placeholder
+            return;
+        }
+
+        const code = option.dataset.code || '';
+        const name = option.dataset.name || '';
+
+        // English comment: Show if matches code or name
+        if (code.includes(term) || name.includes(term)) {
+            option.style.display = '';
+        } else {
+            option.style.display = 'none';
+        }
+    });
 }
 
 // ============================================================================
@@ -489,10 +576,86 @@ async function handleAddEntry(event) {
         await loadUserEntries();
         renderDashboard();
 
+        // English comment: Show success message
+        showSuccess('Wpis dodany pomyślnie!');
+
     } catch (error) {
         console.error('💥 Error adding entry:', error);
         showError('Wystąpił błąd podczas dodawania wpisu: ' + error.message);
     }
+}
+
+/**
+ * English comment: Delete waste entry by ID
+ * @param {string} entryId - UUID of the entry to delete
+ */
+async function deleteEntry(entryId) {
+    if (!supabaseClient || !currentUser) {
+        showError('Błąd: Brak połączenia z bazą danych');
+        return;
+    }
+
+    // English comment: Confirm deletion
+    if (!confirm('Czy na pewno chcesz usunąć ten wpis?')) {
+        return;
+    }
+
+    try {
+        console.log('🗑️ Deleting entry:', entryId);
+
+        // English comment: Delete entry from Supabase
+        const { error } = await supabaseClient
+            .from('waste_entries')
+            .delete()
+            .eq('id', entryId)
+            .eq('user_id', currentUser.id); // English comment: Security - only delete own entries
+
+        if (error) throw error;
+
+        console.log('✅ Entry deleted successfully');
+
+        // English comment: CRITICAL - Clear all containers before re-rendering
+        clearAllContainers();
+
+        // English comment: Re-fetch ALL data from database (full refresh)
+        await loadUserEntries();
+
+        // English comment: Re-render entire dashboard with fresh data
+        renderDashboard();
+
+        // English comment: Show success message
+        showSuccess('Wpis usunięty pomyślnie!');
+
+    } catch (error) {
+        console.error('💥 Error deleting entry:', error);
+        showError('Wystąpił błąd podczas usuwania wpisu: ' + error.message);
+    }
+}
+
+/**
+ * English comment: Clear all dashboard containers to prevent stale data
+ * This ensures old cards are removed when limits drop to zero
+ */
+function clearAllContainers() {
+    // English comment: Clear limit cards container
+    const limitCardsContainer = document.getElementById('limitCardsContainer');
+    if (limitCardsContainer) {
+        limitCardsContainer.innerHTML = '';
+    }
+
+    // English comment: Clear summary container
+    const summaryContainer = document.getElementById('reportsSummary');
+    if (summaryContainer) {
+        summaryContainer.innerHTML = '';
+    }
+
+    // English comment: Clear entries table
+    const tableBody = document.getElementById('recentEntriesTable');
+    if (tableBody) {
+        tableBody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-gray-500">Ładowanie...</td></tr>';
+    }
+
+    console.log('🧹 All containers cleared');
 }
 
 // ============================================================================

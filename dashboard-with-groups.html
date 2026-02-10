@@ -76,6 +76,12 @@
             </div>
 
             <div class="flex items-center space-x-4">
+                <a href="mailto:kontakt@bdohelper.pl?subject=[BDO Helper] Zgłoszenie użytkownika" class="hidden md:flex items-center space-x-1 text-sm text-gray-600 hover:text-emerald-600 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                    </svg>
+                    <span class="font-medium">Pomoc</span>
+                </a>
                 <span id="userEmail" class="hidden md:block text-sm text-gray-500 font-medium border-r pr-4 border-gray-200"></span>
                 <button onclick="handleLogout()" class="text-sm font-semibold text-emerald-600 hover:text-emerald-700">Wyloguj</button>
             </div>
@@ -122,12 +128,39 @@
                     </div>
                 </div>
             </section>
+
+            <!-- English comment: Recent Entries History Table -->
+            <section class="mb-8">
+                <div class="bg-white rounded-2xl shadow-sm p-4 md:p-6 border border-gray-200">
+                    <h2 class="text-lg font-bold text-slate-800 mb-4">Historia wpisów</h2>
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="border-b-2 border-gray-200">
+                                    <th class="text-left py-3 px-2 text-xs md:text-sm font-semibold text-gray-600 uppercase">Data</th>
+                                    <th class="text-left py-3 px-2 text-xs md:text-sm font-semibold text-gray-600 uppercase">Kod</th>
+                                    <th class="text-left py-3 px-2 text-xs md:text-sm font-semibold text-gray-600 uppercase hidden md:table-cell">Nazwa</th>
+                                    <th class="text-right py-3 px-2 text-xs md:text-sm font-semibold text-gray-600 uppercase">Waga</th>
+                                    <th class="text-right py-3 px-2 text-xs md:text-sm font-semibold text-gray-600 uppercase">Akcje</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recentEntriesTable">
+                                <tr>
+                                    <td colspan="5" class="text-center py-8 text-gray-500 text-sm">
+                                        Ładowanie historii...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
         </div>
     </main>
 
     <!-- English comment: Mobile bottom navigation -->
     <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 z-50">
-        <div class="grid grid-cols-3 gap-0">
+        <div class="grid grid-cols-4 gap-0">
             <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="py-3 flex flex-col items-center text-emerald-600">
                 <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
                 <span class="text-[10px] mt-1 font-bold uppercase">Panel</span>
@@ -141,6 +174,10 @@
             <a href="reports.html" class="py-3 flex flex-col items-center text-gray-600">
                 <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
                 <span class="text-[10px] mt-1 font-bold uppercase">Raporty</span>
+            </a>
+            <a href="mailto:kontakt@bdohelper.pl?subject=[BDO Helper] Zgłoszenie użytkownika" class="py-3 flex flex-col items-center text-gray-600">
+                <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                <span class="text-[10px] mt-1 font-bold uppercase">Pomoc</span>
             </a>
         </div>
     </nav>
@@ -158,18 +195,20 @@
                 <button onclick="closeAddEntryModal()" class="text-gray-400 text-2xl hover:text-gray-600 transition-colors">&times;</button>
             </div>
             <form id="addEntryForm" onsubmit="handleAddEntry(event)" class="space-y-4">
-                <!-- English comment: Waste code select with all codes from database -->
+                <!-- English comment: Waste code select with live search -->
                 <div>
                     <label class="block text-xs font-bold text-gray-500 uppercase mb-1">
-                        Kod odpadu
+                        Wyszukaj kod odpadu
                     </label>
-                    <select id="wasteCode" required class="w-full border-2 border-gray-100 rounded-xl p-3 outline-none focus:border-emerald-500">
+                    <input 
+                        type="text" 
+                        id="wasteCodeSearch" 
+                        placeholder="Wpisz numer lub nazwę..."
+                        class="w-full border-2 border-gray-100 rounded-xl p-3 outline-none focus:border-emerald-500 mb-2 text-sm"
+                    />
+                    <select id="wasteCode" required class="w-full border-2 border-gray-100 rounded-xl p-3 outline-none focus:border-emerald-500 text-sm" size="5">
                         <option value="">Ładowanie kodów...</option>
                     </select>
-                    <!-- English comment: Optional: Use datalist for autocomplete
-                    <input list="wasteCodeDatalist" id="wasteCodeInput" class="..." />
-                    <datalist id="wasteCodeDatalist"></datalist>
-                    -->
                 </div>
                 
                 <div>

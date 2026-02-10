@@ -387,19 +387,19 @@ function renderLimitCards(aggregatedData) {
 
 /**
  * English comment: Render recent entries table with delete buttons
- * Shows last 10 entries sorted by date
+ * Shows ALL entries sorted by date (not limited to 10)
  */
 function renderRecentEntries() {
     const tableBody = document.getElementById('recentEntriesTable');
     if (!tableBody) return;
 
-    // English comment: Get recent entries (last 10)
-    const recentEntries = userEntriesCache.slice(0, 10);
+    // English comment: Show ALL entries (already sorted by date desc from query)
+    const allEntries = userEntriesCache;
 
-    if (recentEntries.length === 0) {
+    if (allEntries.length === 0) {
         tableBody.innerHTML = `
             <tr>
-                <td colspan="4" class="text-center py-8 text-gray-500 text-sm">
+                <td colspan="5" class="text-center py-8 text-gray-500 text-sm">
                     Brak wpisów. Dodaj pierwszy wpis!
                 </td>
             </tr>
@@ -407,8 +407,8 @@ function renderRecentEntries() {
         return;
     }
 
-    // English comment: Generate table rows
-    const rowsHTML = recentEntries.map(entry => {
+    // English comment: Generate table rows for ALL entries
+    const rowsHTML = allEntries.map(entry => {
         const date = new Date(entry.entry_date).toLocaleDateString('pl-PL');
         const codeInfo = wasteCodesCache.find(c => c.waste_code === entry.waste_code);
         const codeName = codeInfo ? codeInfo.name : 'Nieznany kod';
@@ -437,6 +437,14 @@ function renderRecentEntries() {
     }).join('');
 
     tableBody.innerHTML = rowsHTML;
+    
+    // English comment: Update entry count display
+    const entryCountEl = document.getElementById('entryCount');
+    if (entryCountEl) {
+        entryCountEl.textContent = allEntries.length;
+    }
+    
+    console.log(`✅ Rendered ${allEntries.length} entries in history table`);
 }
 
 // ============================================================================
@@ -606,8 +614,13 @@ async function deleteEntry(entryId) {
 
         console.log('✅ Entry deleted successfully');
 
-        // English comment: Reload data and re-render dashboard
+        // English comment: CRITICAL - Clear all containers before re-rendering
+        clearAllContainers();
+
+        // English comment: Re-fetch ALL data from database (full refresh)
         await loadUserEntries();
+
+        // English comment: Re-render entire dashboard with fresh data
         renderDashboard();
 
         // English comment: Show success message
@@ -617,6 +630,32 @@ async function deleteEntry(entryId) {
         console.error('💥 Error deleting entry:', error);
         showError('Wystąpił błąd podczas usuwania wpisu: ' + error.message);
     }
+}
+
+/**
+ * English comment: Clear all dashboard containers to prevent stale data
+ * This ensures old cards are removed when limits drop to zero
+ */
+function clearAllContainers() {
+    // English comment: Clear limit cards container
+    const limitCardsContainer = document.getElementById('limitCardsContainer');
+    if (limitCardsContainer) {
+        limitCardsContainer.innerHTML = '';
+    }
+
+    // English comment: Clear summary container
+    const summaryContainer = document.getElementById('reportsSummary');
+    if (summaryContainer) {
+        summaryContainer.innerHTML = '';
+    }
+
+    // English comment: Clear entries table
+    const tableBody = document.getElementById('recentEntriesTable');
+    if (tableBody) {
+        tableBody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-gray-500">Ładowanie...</td></tr>';
+    }
+
+    console.log('🧹 All containers cleared');
 }
 
 // ============================================================================
